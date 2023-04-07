@@ -1,0 +1,94 @@
+﻿@page "/addClient/{clientId:int?}"
+
+@using NSCBlazor.Shared
+@using NSCBlazor.Shared.Models
+
+@inject IJSRuntime JSRuntime
+@inject HttpClient Http
+@inject NavigationManager NavigationManager
+
+
+<style>.notif-show{display: none;}</style>
+
+<hr />
+
+<h3>@AddOrEditLabel</h3>
+
+<DxFormLayout CssClass="w-25">
+    <DxFormLayoutItem ColSpanMd="12" Caption="Имя">
+        <DxTextBox @bind-Text="@client.Name" />
+    </DxFormLayoutItem>
+
+    <DxFormLayoutItem ColSpanMd="12" Caption="Фамилия">
+        <DxTextBox @bind-Text="@client.Surname" CssClass="cw-320" />
+    </DxFormLayoutItem>
+
+    <DxFormLayoutItem ColSpanMd="12" Caption="Страна">
+        <DxTextBox @bind-Text="@client.Country" CssClass="cw-320" />
+    </DxFormLayoutItem>
+
+    <DxFormLayoutItem ColSpanMd="12" Caption="Город">
+        <DxTextBox @bind-Text="@client.City" CssClass="cw-320" />
+    </DxFormLayoutItem>
+
+</DxFormLayout>
+
+<p>
+     <DxButton RenderStyle="ButtonRenderStyle.Primary"
+               Text="@labelButton"
+               CssClass="w-25" 
+               Click="@(() => SaveClient_Click(client))"/>
+</p>
+<span class="notifShow" style="display: none; color: green;">@notifMessage</span>
+
+<hr />
+
+@code {
+    [Parameter]
+    public int clientId { get; set; }
+
+    Client client = new Client();
+    private string? AddOrEditLabel, labelButton, notifMessage;
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        if(clientId > 0)
+        {
+            await LoadClient(clientId);
+            AddOrEditLabel = "Изменить клиента:";
+        }
+        else
+        {
+            AddOrEditLabel = "Добавить клиента:";
+        }
+        labelButton = "Сохранить";
+    }
+
+    private async Task SaveClient_Click(Client client)
+    {
+        HttpResponseMessage? response;
+        if (clientId < 1)
+        {
+            response = await Http.PostAsJsonAsync("https://localhost:7256/Client/AddClient", client);
+            if (response.IsSuccessStatusCode)
+                NavigationManager.NavigateTo("");
+        }
+        else
+        {
+            response = await Http.PutAsJsonAsync("https://localhost:7256/Client/EditClient", client);
+            if (response.IsSuccessStatusCode)
+            {   notifMessage = "Данные пользователь успешно обновлены!";             
+                await JSRuntime.InvokeVoidAsync("ShowNotification", "notifShow");
+                StateHasChanged();
+            }
+            await Task.Run(() => System.Threading.Thread.Sleep(2200));
+            NavigationManager.NavigateTo("");
+        }
+    }
+
+    private async Task LoadClient(int clientId)
+    {
+        client = await Http.GetFromJsonAsync<Client>($"https://localhost:7256/Client/GetClientById?id={clientId}");
+    }
+}

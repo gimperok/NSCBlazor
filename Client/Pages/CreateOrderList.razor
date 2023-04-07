@@ -1,0 +1,397 @@
+﻿@page "/Order/{clientId:int?}/{orderId:int?}"
+
+
+@using NSCBlazor.Shared
+@using NSCBlazor.Shared.Models
+@inject HttpClient Http
+
+<style>
+    table, th, tr, td {
+        border: solid 1px;
+        border-collapse: collapse;
+    }
+/*    th, td{
+        width: 7%;
+    }*/
+
+    table
+    {
+        width:100%;
+    }
+
+    col, th, td
+    {
+        width: 7%;
+        text-align: center;    
+    }
+    input
+    {
+        width: 100%;
+    }
+</style>
+
+
+
+
+
+
+@if (orderList is not null && orderString is not null)
+{
+    <h3>Заказ №@orderList.Id</h3>
+       <div class="row mt-3" >
+            <div class="col text-center">
+                <label>Kod:</label>
+            </div>
+            <div class="col">
+                <label>Leather:</label>
+            </div>
+            <div class="col">
+                <label>Color:</label>
+            </div>
+            <div class="col">
+                <label>35:</label>
+            </div>
+            <div class="col">
+                <label>36:</label>
+            </div>
+            <div class="col">
+                <label>37:</label>
+            </div>
+            <div class="col">
+                <label>38:</label>
+            </div>
+            <div class="col">
+                <label>39:</label>
+            </div>
+            <div class="col">
+                <label>40:</label>
+            </div>
+            <div class="col">
+                <label>41:</label>
+            </div>
+            <div class="col">
+                <label>TotalCountPairs:</label>
+            </div>
+            <div class="col">
+                <label>Price:</label>
+            </div>
+            <div class="col">
+                <label>TotalPrice:</label>
+            </div>
+            <div class="col">
+                <label>Note:</label>
+            </div>
+        </div>
+
+    
+        <div class="row mt-3  text-center">
+            <div class="col">
+                <input @bind="orderString.Kod">
+            </div>
+            <div class="col">
+                <input @bind="orderString.Leather">
+            </div>
+            <div class="col">
+                <input @bind="orderString.Color">
+            </div>
+            <div class="col">
+                <input @bind="orderString.Size35">
+            </div>
+            <div class="col">
+                <input @bind="orderString.Size36">
+            </div>
+            <div class="col">
+                <input @bind="orderString.Size37">
+            </div>
+            <div class="col">
+                <input @bind="orderString.Size38">
+            </div>
+            <div class="col">
+                <input @bind="orderString.Size39">
+            </div>
+            <div class="col">
+                <input @bind="orderString.Size40">
+            </div>
+            <div class="col">
+                <input @bind="orderString.Size41">
+            </div>
+            <div class="col">
+                <span>@orderString.TotalCountPairs</span>
+            </div>
+            <div class="col">
+                <input @bind="orderString.Price">
+            </div>
+            <div class="col">
+                <span>@orderString.TotalPrice</span>
+            </div>
+            <div class="col">
+                <input @bind="orderString.Note">
+            </div>
+        </div>
+        
+    <button class="mt-3" @onclick="(()=>AddString())">Добавить строку</button>
+
+    @if (orderList.OrderStrings.Count!=0)
+    {
+        <hr />
+
+
+        <div>
+            <span><b>Лист заказа:</b></span>
+
+            <div style="display:flex; ">
+                <table style="margin: 0 auto;width: 100%;">
+                    <tr>
+                        <th>Kod</th>
+                        <th>Leather</th>
+                        <th>Color</th>
+                        <th>35</th>
+                        <th>36</th>
+                        <th>37</th>
+                        <th>38</th>
+                        <th>39</th>
+                        <th>40</th>
+                        <th>41</th>
+                        <th>TotalPair</th>
+                        <th>Price</th>
+                        <th>TotalPrice</th>
+                        <th>Note</th>
+                        <th></th>
+                    </tr>
+                    @if (orderList?.OrderStrings?.Count != 0 || orderList.OrderStrings is not null)
+                    {
+                        @foreach (var ordStr in orderList?.OrderStrings.OrderByDescending(str => str.Id))
+                        {
+                            <tr>
+                                <td>@ordStr.Kod</td>
+                                <td>@ordStr.Leather</td>
+                                <td>@ordStr.Color</td>
+                                <td>@ordStr.Size35</td>
+                                <td>@ordStr.Size36</td>
+                                <td>@ordStr.Size37</td>
+                                <td>@ordStr.Size38</td>
+                                <td>@ordStr.Size39</td>
+                                <td>@ordStr.Size40</td>
+                                <td>@ordStr.Size41</td>
+                                <td>@ordStr.TotalCountPairs</td>
+                                <td>@ordStr.Price</td>
+                                <td>@ordStr.TotalPrice</td>
+                                <td>@ordStr.Note</td>
+                                <td><button @onclick="(()=>DelString(ordStr))">Del</button></td>
+                            </tr>
+                        }
+                    }
+                </table>
+            </div>
+        </div>
+
+
+
+
+        <hr />
+        <div style="display:block; float:right;">
+            <span><b>Инфа по заказу:</b></span>
+            <div>
+                <label>Заказ: </label>
+                <label>#@orderList.Id</label>
+            </div>
+            <div>
+                <label>TotalPosition:</label>
+                <label>@orderList.TotalPosition</label>
+            </div>
+            <div>
+                <label>TotalPairs:</label>
+                <label>@orderList.TotalPairs</label>
+            </div>
+            <div>
+                <label>OrderTotalMoney:</label>
+                <label>@orderList.OrderTotalMoney</label>
+            </div>
+            <div>
+                <label>Deposit:</label>
+                <label>@orderList.Deposit</label>
+            </div>
+            <div>
+                <label>DateCreate:</label>
+                <label>@orderList.DateCreate</label>
+            </div>
+            @if (currentClient != null)
+            {
+                <div>
+                    <label>Client:</label>
+                    <label>@currentClient.FullName</label>
+                </div>
+            }
+        </div>
+    }
+}
+else
+{
+    <span>Лист заказа еще не создан</span>
+}
+
+
+
+
+@code {
+    [Parameter]
+    public int clientId { get; set; }
+    [Parameter]
+    public int? orderId { get; set; }
+
+    public Client currentClient { get; set; }
+    OrderList orderList;
+    OrderString orderString = new OrderString();
+
+
+
+    protected async override Task OnInitializedAsync()
+    {
+        if (orderId > 0)
+        {
+            await GetOrder(orderId);
+        }
+        else
+        {
+            await CreateAndGetOrder();
+        }
+        await GetClient(clientId);
+    }
+
+    protected async Task GetClient(int clientId)
+    {
+        currentClient = await Http.GetFromJsonAsync<Client>($"https://localhost:7256/Client/GetClientById?id={clientId}");
+    }
+
+    protected async Task GetOrder(int? orderId)
+    {
+        orderList = await Http.GetFromJsonAsync<OrderList>($"https://localhost:7256/OrderList/GetOrderById?id={orderId}");
+
+        var allOrderStringsList = await Http.GetFromJsonAsync<List<OrderString>>($"https://localhost:7256/OrderString/GetAllStringsByOrderListId?id={orderId}");
+
+        if (orderList != null)
+            orderList.OrderStrings = allOrderStringsList;
+    }
+
+    protected async Task CreateAndGetOrder()
+    {
+        orderList = new OrderList();
+        orderList.ClientId = clientId;
+
+        var resp = await Http.PostAsJsonAsync("https://localhost:7256/OrderList/AddOrderList", orderList);
+
+        if (resp.IsSuccessStatusCode)
+            orderList = await Http.GetFromJsonAsync<OrderList>($"https://localhost:7256/OrderList/GetLastCreatedOrderListByUserId?id={clientId}");
+        orderId = orderList.Id;
+        StateHasChanged();
+    }
+
+
+    protected async Task AddString()
+    {
+        //TODO Добавить Валидацию
+        orderString.OrderListId = orderList.Id;
+        var resp = await Http.PostAsJsonAsync("https://localhost:7256/OrderString/AddOrderString", orderString);
+        if(resp.IsSuccessStatusCode)
+        {
+            orderList.OrderStrings = await Http.GetFromJsonAsync<List<OrderString>>("https://localhost:7256/OrderString/GetAllStringsByOrderListId?id=" + orderId);
+
+            ClearFields();
+
+            StateHasChanged();
+        }
+    }
+
+    protected async Task DelString(OrderString orderString)
+    {
+        orderString.OrderListId = orderList.Id;
+        var resp = await Http.DeleteAsync($"https://localhost:7256/OrderString/DeleteOrderString?id={orderString.Id}");
+        if(resp.IsSuccessStatusCode)
+            orderList.OrderStrings.Remove(orderString);
+
+        StateHasChanged();
+    }
+
+    protected void ClearFields()
+    {
+        orderString.Kod = string.Empty;
+        orderString.Leather = string.Empty;
+        orderString.Color = string.Empty;
+        orderString.Note = string.Empty;
+
+        orderString.Size35 = 0;
+        orderString.Size36 = 0;
+        orderString.Size37 = 0;
+        orderString.Size38 = 0;
+        orderString.Size39 = 0;
+        orderString.Size40 = 0;
+        orderString.Size41 = 0;
+        orderString.Price = 0;
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    //protected async override Task OnInitializedAsync()
+    //{
+    //    await GetOrderList(clientId);
+
+    //    orderString = new OrderString();
+
+    //    await GetAllStringsInOrder(orderList.Id);
+    //}
+
+    //protected async Task AddString()
+    //{
+    //    orderString.OrderListId = orderList.Id;
+
+    //    var resp = await Http.PostAsJsonAsync("https://localhost:7256/OrderString/AddOrderString", orderString);
+    //    await GetAllStringsInOrder(orderList.Id);
+
+
+    //    orderList = await GetOrderList(clientId);
+    //}
+
+
+    //protected async Task<OrderList> GetOrderList(int id)
+    //{
+    //    orderList = await Http.GetFromJsonAsync<OrderList>($"https://localhost:7256/OrderList/GetLastCreatedOrderListByUserId?id={id}");
+    //    return orderList;
+    //}
+
+
+    //List<OrderString> allOrderStringsList;
+    //protected async Task GetAllStringsInOrder(int orderId)
+    //{
+    //    allOrderStringsList = await Http.GetFromJsonAsync<List<OrderString>>("https://localhost:7256/OrderString/GetAllStringsByOrderListId?id=" + orderId);
+
+    //    orderList.OrderStrings = allOrderStringsList;
+    //    orderList.DateModify = DateTime.UtcNow;
+
+    //    await EditOrderList(orderList);
+
+    //    StateHasChanged();
+    //}
+
+    //protected async Task EditOrderList(OrderList orderList)
+    //{
+    //    await Http.PutAsJsonAsync<OrderList>("https://localhost:7256/OrderList/EditOrderList", orderList);
+    //    await GetOrderList(clientId);
+    //}
+}

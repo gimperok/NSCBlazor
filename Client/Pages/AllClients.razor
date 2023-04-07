@@ -1,0 +1,123 @@
+﻿@page "/AllClients"
+@using NSCBlazor.Shared
+@using NSCBlazor.Shared.Models
+@inject HttpClient Http
+@inject NavigationManager NavigationManager
+
+
+<PageTitle>AllClients</PageTitle>
+
+
+
+
+
+
+@if (allClients == null)
+{
+    <p>Загрузка клиентов...</p>
+}
+else if (allClients.Count == 0)
+{
+    <p>Список клиентов пуст!</p>
+}
+else
+{
+    <h3>Список клиентов:</h3>
+    foreach (var client in allClients)
+    {
+        <p>
+            <span>Имя:</span>
+            <span>@client.Name</span>
+        </p>
+        <p>                        
+            <span>Фамилия:</span>
+            <span>@client.Surname</span>
+        </p>
+        <p> 
+            <span>Страна:</span>
+            <span>@client.Country</span>
+        </p>
+        <p>            
+            <span>Город:</span>
+            <span>@client.City</span>
+        </p>
+        <p>
+            <button onclick="@(() => DeleteClient(client.Id))">Del</button>
+            <button style="margin-left:10px;" onclick="@(() => CreateOrder(client))">Создать заказ</button>
+
+        </p>
+        <hr/>
+    }
+}
+
+
+
+@code {
+    private WeatherForecast[]? forecasts;
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        forecasts = await Http.GetFromJsonAsync<WeatherForecast[]>("WeatherForecast");
+        //client = await Http.GetFromJsonAsync<Client>("https:localhost:7145/api/Client/GetClientById?id=1");
+
+        /*await GetClient(4);*/   //ЭТО РАБОТАЕТ ТОЛЬКО ID нужно имеющийся
+
+        await GetAllClient();
+
+    }
+
+    Client? clientForShow;
+    private async Task GetClient(int id)
+    {
+        clientForShow = await Http.GetFromJsonAsync<Client>("https://localhost:7256/Client/GetClientById?id="+id);
+
+        //почему так не работает?
+        //var resp = await Http.SendAsync(new HttpRequestMessage(HttpMethod.Get, "https:localhost:7145/Client/GetClientById?id=1"));
+        //clientForShow = JsonSerializer.Deserialize<Client>(resp.Content.ToString());
+    }
+
+    List<Client> allClients;
+    private async Task GetAllClient()
+    {
+        allClients = await Http.GetFromJsonAsync<List<Client>>("https://localhost:7256/Client/GetAllClients");
+        StateHasChanged();
+    }
+
+
+
+
+
+    Client clientForAdd = new Client();
+    private async Task AddClient(Client clientadd)
+    {
+        var resp = await Http.PostAsJsonAsync("https://localhost:7256/Client/AddClient", clientadd);
+        if (resp.IsSuccessStatusCode)
+            clientadd = null;
+        await GetAllClient();
+
+    }
+
+
+    private async Task DeleteClient(int id)
+    {
+        var resp = await Http.DeleteAsync("https://localhost:7256/Client/DeleteClient?id="+ id);
+
+        await GetAllClient();
+    }
+
+
+    private async Task CreateOrder(Client client)
+    {
+        OrderList orderList = new OrderList();
+        orderList.ClientId = client.Id;
+        orderList.DateCreate = DateTime.UtcNow;
+
+        var resp = await Http.PostAsJsonAsync("https://localhost:7256/OrderList/AddOrderList", orderList);
+        
+        if(resp.IsSuccessStatusCode)
+            NavigationManager.NavigateTo($"/CreateorderList/{client.Id}");
+    }
+
+
+}
