@@ -1,27 +1,28 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using ProjectJson.Models;
 
 namespace NSCBlazor.Server.Controllers
 {
     [ApiController]
     [Route("[controller]/[action]")]
-    public class OrderStringController : Controller
+    public class OrderItemController : Controller
     {
         private readonly HttpClient httpClient;
-        public OrderStringController(HttpClient _httpClient)
+        public OrderItemController(HttpClient _httpClient)
         {
             httpClient = _httpClient;
         }
 
         [HttpGet]
-        public async Task<List<Shared.Models.OrderString>> GetAllStringsByOrderListId(int id)
+        public async Task<List<OrderItemMessage>> GetAllStringsByOrderListId(int id)
         {
-            List<Shared.Models.OrderString> orderStrings = await httpClient.GetFromJsonAsync<List<Shared.Models.OrderString>>($"{AppSettings.GetApiUrl}{AppSettings.GetAllStringsByOrderListId}" + id);
+            List<OrderItemMessage> orderStrings = await httpClient.GetFromJsonAsync<List<OrderItemMessage>>($"{AppSettings.GetApiUrl}{AppSettings.GetAllStringsByOrderListId}" + id);
             return orderStrings;
         }
 
 
         [HttpPost]
-        public async Task<bool> AddOrderString(Shared.Models.OrderString orderString)
+        public async Task<bool> AddOrderString(OrderItemMessage orderString)
         {
             var response = await httpClient.PostAsJsonAsync($"{AppSettings.GetApiUrl}{AppSettings.AddOrderString}", orderString);
             if (response.IsSuccessStatusCode)
@@ -31,7 +32,7 @@ namespace NSCBlazor.Server.Controllers
 
 
         [HttpPut]
-        public async Task<bool> EditOrderString(Shared.Models.OrderString orderString)
+        public async Task<bool> EditOrderString(OrderItemMessage orderString)
         {
             var response = await httpClient.PutAsJsonAsync($"{AppSettings.GetApiUrl}{AppSettings.EditOrderString}", orderString);
             if (response.IsSuccessStatusCode)

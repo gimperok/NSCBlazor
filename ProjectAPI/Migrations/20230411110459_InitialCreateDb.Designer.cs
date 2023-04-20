@@ -11,8 +11,8 @@ using ProjectAPI.DBContext;
 namespace ProjectAPI.Migrations
 {
     [DbContext(typeof(ApplicationContext))]
-    [Migration("20230407061036_InitDb")]
-    partial class InitDb
+    [Migration("20230411110459_InitialCreateDb")]
+    partial class InitialCreateDb
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -20,7 +20,7 @@ namespace ProjectAPI.Migrations
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "8.0.0-preview.2.23128.3");
 
-            modelBuilder.Entity("ProjectAPI.Models.ClientDb", b =>
+            modelBuilder.Entity("ProjectJson.Models.ClientMessage", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -53,32 +53,7 @@ namespace ProjectAPI.Migrations
                     b.ToTable("Clients");
                 });
 
-            modelBuilder.Entity("ProjectAPI.Models.OrderListDb", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int?>("ClientDbId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int?>("ClientId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<DateTime?>("DateCreate")
-                        .HasColumnType("TEXT");
-
-                    b.Property<DateTime?>("DateModify")
-                        .HasColumnType("TEXT");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ClientDbId");
-
-                    b.ToTable("OrderLists");
-                });
-
-            modelBuilder.Entity("ProjectAPI.Models.OrderStringDb", b =>
+            modelBuilder.Entity("ProjectJson.Models.OrderItemMessage", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -88,23 +63,18 @@ namespace ProjectAPI.Migrations
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Kod")
-                        .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Leather")
-                        .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Note")
                         .HasColumnType("TEXT");
 
-                    b.Property<int?>("OrderListDbId")
+                    b.Property<int?>("OrderId")
                         .HasColumnType("INTEGER");
 
-                    b.Property<int?>("OrderListId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<double?>("Price")
+                    b.Property<double>("Price")
                         .HasColumnType("REAL");
 
                     b.Property<int>("Size35")
@@ -130,33 +100,59 @@ namespace ProjectAPI.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("OrderListDbId");
+                    b.HasIndex("OrderId");
 
-                    b.ToTable("OrderStrings");
+                    b.ToTable("OrderItems");
                 });
 
-            modelBuilder.Entity("ProjectAPI.Models.OrderListDb", b =>
+            modelBuilder.Entity("ProjectJson.Models.OrderMessage", b =>
                 {
-                    b.HasOne("ProjectAPI.Models.ClientDb", null)
-                        .WithMany("OrderLists")
-                        .HasForeignKey("ClientDbId");
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int?>("ClientId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime?>("DateCreate")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime?>("DateModify")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ClientId");
+
+                    b.ToTable("Orders");
                 });
 
-            modelBuilder.Entity("ProjectAPI.Models.OrderStringDb", b =>
+            modelBuilder.Entity("ProjectJson.Models.OrderItemMessage", b =>
                 {
-                    b.HasOne("ProjectAPI.Models.OrderListDb", null)
-                        .WithMany("OrderStrings")
-                        .HasForeignKey("OrderListDbId");
+                    b.HasOne("ProjectJson.Models.OrderMessage", "Order")
+                        .WithMany("OrderItems")
+                        .HasForeignKey("OrderId");
+
+                    b.Navigation("Order");
                 });
 
-            modelBuilder.Entity("ProjectAPI.Models.ClientDb", b =>
+            modelBuilder.Entity("ProjectJson.Models.OrderMessage", b =>
                 {
-                    b.Navigation("OrderLists");
+                    b.HasOne("ProjectJson.Models.ClientMessage", "Client")
+                        .WithMany("Orders")
+                        .HasForeignKey("ClientId");
+
+                    b.Navigation("Client");
                 });
 
-            modelBuilder.Entity("ProjectAPI.Models.OrderListDb", b =>
+            modelBuilder.Entity("ProjectJson.Models.ClientMessage", b =>
                 {
-                    b.Navigation("OrderStrings");
+                    b.Navigation("Orders");
+                });
+
+            modelBuilder.Entity("ProjectJson.Models.OrderMessage", b =>
+                {
+                    b.Navigation("OrderItems");
                 });
 #pragma warning restore 612, 618
         }

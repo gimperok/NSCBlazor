@@ -3,151 +3,207 @@
 @using NSCBlazor.Shared
 @using NSCBlazor.Shared.Models
 @using System.Text.Json
+@using ProjectJson.Models
 
 @inject HttpClient Http
 @inject NavigationManager NavigationManager
 
 
+<style>
+    .w-30 {
+        width: 30%;
+    }
 
+    .ml-27 {
+        margin-left: 27%;
+    }
+
+    .page-link {
+        background: peachpuff;
+        border-color: black;
+        color: black;
+        border-width: 2px;
+    }
+
+    .page-item.active .page-link {
+        background-color: peachpuff;
+        border-color: black;
+        font-weight: 600;
+    }
+
+    .page-link:hover {
+        color: black;
+        background-color: oldlace;
+    }
+
+    .del-red:hover {
+        color: indianred;
+    }
+
+    .order-item{
+        display: flex;
+        background-color: rgba(250,240,230,0.75);
+        border: 2px solid whitesmoke;
+        border-radius: 12px;
+        color: black;
+        margin: 10px 10px 30px 10px;
+        padding: 10px;
+    }
+    .order-item:hover {
+        background-color: rgba(250,240,230,1.0);
+        border: 2px solid black;
+    }
+</style>
 
 <PageTitle>Nursace Order App</PageTitle>
 
-<h3>
-    Выбрать клиента:
-</h3>
 
 
-        <DxComboBox Data="@allClients"
-                TextFieldName="@nameof(Client.FullName)"
-                Value="@selectedClient"
-                CssClass="w-50"
-                ValueChanged="@((Client client) => SelectedClientChanged(client))" />
-
-    @if (allClients is not null && allClients.Count != 0)
-    {        
-        <div>
-            <button style="margin-left:15px;" onclick="@(() => NavigationManager.NavigateTo($"/addclient/{selectedClient.Id}"))" title="Изменить данные клиента">
-                <i class="fa fa-pencil" aria-hidden="true"></i>
-            </button>
-        
-
-
-            <button title="Новый заказ" onclick="@(() => CreateOrder(selectedClient))">
-                <i class="fa fa-plus" aria-hidden="true"></i>
-            </button>
-
-            <button title="Список заказов" onclick="@(() => GetAllOrders_Click())">
-                <i class="fa fa-list" aria-hidden="true"></i>
-            </button>
-        </div>
-    }
-    else
-    {
-        <span>Список клиентов пуст! Выберите пункт меню "Добавить клиента".</span>
-    }
-
-
-
-
-
-
-
-
-
-@if (allOrdersForCurrentUser == null)
+@if (allOrdersFromDb is null)
 {
-    <div>@string.Empty</div>
+    <div class="loader" style="--b: 20px;--c: #000;width: 80px;--n: 15;--g: 7deg; margin-left: 40%;margin-top: 25%;"></div>
 }
-else if (allOrdersForCurrentUser.Count == 0)
+else if (allOrdersFromDb.Count == 0)
 {
-    <div>У данного клиента пока нет заказов</div>
+    <label>Список заказов пуст.</label>
 }
 else
-{    
-    foreach (var order in allOrdersForCurrentUser)
-    {
-        <a href="/order/@selectedClient.Id/@order.Id">
-            <div>
-                <div>
-                    <label>Заказ #</label>
-                    <label>: @order.Id</label>
-                </div>
-                <div>
-                    <label>TotalPosition</label>
-                    <label>: @order.TotalPosition</label>
-                </div>
-                <div>
-                    <label>TotalPairs</label>
-                    <label>: @order.TotalPairs</label>
-                </div>
-                <div>
-                    <label>OrderTotalMoney</label>
-                    <label>: @order.OrderTotalMoney</label>
-                </div>
-                <div>
-                    <label>Deposit</label>
-                    <label>: @order.Deposit</label>
-                </div>
-                <div>
-                    <label>DateCreate</label>
-                    <label>: @order.DateCreate</label>
-                </div>
+{
+    <div class="d-flex justify-content-center">
+        <DxButton RenderStyle="ButtonRenderStyle.None"
+                  title="Добавить заказ"
+                  CssClass="fa fa-plus-circle fa-2x"
+                  Click="@(() => NavigationManager.NavigateTo("/order"))" />
+    </div>
 
+
+    foreach (var order in ShowOrderInPage())
+    {
+        <div class="order-item">
+
+            <div class="d-flex justify-content-start" style="width:28%; flex-direction: column;">
+                <label style="font-weight: 600;"><a href="/order/@order.Id" style="text-decoration:none; color:black; cursor:pointer;">@order?.Client?.FullName</a></label>
+                <label>Всего пар: @order.TotalPairs</label>
+                <label>Всего позиций: @order.TotalPosition</label>
             </div>
-        </a>
-        <div>
-            <button onclick="@(() => DeleteOrder(order.Id))">Del</button>
+
+            <div class="d-flex justify-content-center" style="width:44%;">
+                <div style="flex-direction:column;">
+                    <label style="font-weight: 600;"><a href="/order/@order.Id" style="text-decoration:none; color:black; cursor:pointer;">Заказ № @order.Id</a></label>
+                    <div>
+                        <label>@string.Empty</label>
+                    </div>
+                    <div class="d-flex justify-content-center ">
+                        <DxButton RenderStyle="ButtonRenderStyle.None"
+                                  title="Удалить заказ"
+                                  CssClass="fa fa-trash del-red"
+                                  Click="@(() => DeleteOrder(order.Id))" />
+                    </div>
+                </div>
+            </div>
+
+            <div class="d-flex justify-content-end" style="flex-direction: column; min-width: 155px; margin-left:auto;">
+                <label style="font-weight: 600;">@order.DateCreate?.ToString("dd.MM.yy HH:mm")</label>
+                <label>Сумма заказа: @order.OrderTotalMoney.ToString("#.##")$</label>
+                <label>Депозит: @order.Deposit.ToString("#.##")$</label>
+            </div>
         </div>
-        <hr />
+
     }
-    
 }
 
-
-
+@if (allOrdersFromDb?.Count > 2)
+{
+    <DxPager PageCount="@PageCounter()"
+         VisibleNumericButtonCount="3"
+         @bind-ActivePageIndex="@actPageNumb"
+         NavigationMode="PagerNavigationMode.NumericButtons" />
+}
 
 
 @code
 {
-    Client selectedClient { get; set; }
+    private int indexFirstElInPage = 0;
+    private int actPageNumb = 0;
+    private int countOrderInPage = 5;
+    Client? selectedClient { get; set; }
     List<Client> allClients { get; set; }
-    List<OrderList>? allOrdersForCurrentUser { get; set; }
+    List<Order>? allOrdersFromDb { get; set; }
+
+
+    protected int PageCounter()
+    {
+        if (allOrdersFromDb?.Count() % countOrderInPage == 0)
+            return allOrdersFromDb.Count() / countOrderInPage;
+        return allOrdersFromDb.Count() / countOrderInPage + 1;
+    }
+
+    private List<Order> OrdersForShow;
+    protected List<Order> ShowOrderInPage()
+    {
+        if (allOrdersFromDb.Count <= countOrderInPage)
+        {
+            OrdersForShow = allOrdersFromDb.GetRange(indexFirstElInPage, allOrdersFromDb.Count);
+        }
+        else if (allOrdersFromDb.Count > countOrderInPage && ((actPageNumb + 1) * countOrderInPage) <= allOrdersFromDb.Count)
+        {
+            OrdersForShow = allOrdersFromDb.GetRange(actPageNumb * countOrderInPage, countOrderInPage);
+        }
+        else if (allOrdersFromDb.Count > countOrderInPage && ((actPageNumb + 1) * countOrderInPage) > allOrdersFromDb.Count)
+        {
+            OrdersForShow = allOrdersFromDb.GetRange(actPageNumb * countOrderInPage, allOrdersFromDb.Count % countOrderInPage);
+        }
+
+        return OrdersForShow;
+    }
 
     protected override async Task OnInitializedAsync()
     {
-        await GetAllClient();
+        await GetAllOrdersFromDB();
+        ShowOrderInPage();
     }
 
     private async Task GetAllClient()
     {
         allClients = await Http.GetFromJsonAsync<List<Client>>("https://localhost:7256/Client/GetAllClients");
-        //allClients = await Http.GetFromJsonAsync<List<Client>>("https://localhost:7145/api/Client/GetAllClients");     ПОЧЕМУ НЕЛЬЗЯ СРАЗУ ЗАПРОС НА API??
-        selectedClient = allClients.FirstOrDefault();
+        //var resp = await Http.SendAsync(new HttpRequestMessage(HttpMethod.Get, "https:localhost:7256/Client/GetClientById?id=1"));
+
+        selectedClient = allClients?.FirstOrDefault();
 
         StateHasChanged();
     }
 
     private async Task GetAllOrders(int clientId)
     {
-        allOrdersForCurrentUser = await Http.GetFromJsonAsync<List<OrderList>>("https://localhost:7256/OrderList/GetAllOrderListsByUserId?clientId=" + clientId);
+        allOrdersFromDb = await Http.GetFromJsonAsync<List<Order>>("https://localhost:7256/Order/GetAllOrderListsByUserId?clientId=" + clientId);
         await GetAllOrderStringsInOrder();
+        StateHasChanged();
+    }
+
+    private async Task GetAllOrdersFromDB() //пока не используется
+    {
+        allOrdersFromDb = await Http.GetFromJsonAsync<List<Order>>("https://localhost:7256/Order/GetAllOrdersFromDb");
+
+        foreach (var order in allOrdersFromDb)
+        {
+            order.OrderItems = await Http.GetFromJsonAsync<List<OrderItem>>($"https://localhost:7256/OrderItem/GetAllStringsByOrderListId?id={order.Id}");
+        }
         StateHasChanged();
     }
 
 
     private async Task GetAllOrderStringsInOrder()
     {
-        foreach(OrderList ordList in allOrdersForCurrentUser)
+        foreach (Order ordList in allOrdersFromDb)
         {
-            ordList.OrderStrings = await Http.GetFromJsonAsync<List<OrderString>>($"https://localhost:7256/OrderString/GetAllStringsByOrderListId?id={ordList.Id}");
+            ordList.OrderItems = await Http.GetFromJsonAsync<List<OrderItem>>($"https://localhost:7256/OrderItem/GetAllStringsByOrderListId?id={ordList.Id}");
         }
     }
 
 
-
     private async Task GetAllOrders_Click()
     {
-        await GetAllOrders(selectedClient.Id);
+        await GetAllOrdersFromDB();
     }
 
     private async Task CreateOrder(Client client)
@@ -155,21 +211,19 @@ else
         NavigationManager.NavigateTo($"/Order/{client.Id}");
     }
 
-    private void SelectedClientChanged(Client client) 
+    private void SelectedClientChanged(Client client)
     {
         selectedClient = client;
-        allOrdersForCurrentUser = null;
+        allOrdersFromDb = null;
         StateHasChanged();
     }
 
-
     private async Task DeleteOrder(int id)
     {
-        var response = await Http.DeleteAsync($"https://localhost:7256/OrderString/DeleteAllStringsForOrder?id={id}");
+        var response = await Http.DeleteAsync($"https://localhost:7256/OrderItem/DeleteAllStringsForOrder?id={id}");
         if (response.IsSuccessStatusCode)
-            await Http.DeleteAsync($"https://localhost:7256/OrderList/DeleteOrderList?id={id}");
+            await Http.DeleteAsync($"https://localhost:7256/Order/DeleteOrderList?id={id}");
 
         GetAllOrders_Click();
     }
-    
 }

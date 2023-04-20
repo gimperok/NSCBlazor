@@ -7,6 +7,15 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="Reports\OrderReport.vsrepx" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="Reports\OrderReport.vsrepx" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="DevExpress.AspNetCore.Reporting" Version="21.2.6-pre-22026" />
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Server" Version="6.0.8" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite.Core" Version="8.0.0-preview.2.23128.3" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="7.0.4">
@@ -18,7 +27,17 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Client\NSCBlazor.Client.csproj" />
+    <ProjectReference Include="..\ProjectJson\ProjectJson.csproj" />
     <ProjectReference Include="..\Shared\NSCBlazor.Shared.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Update="Reports\OrderReport.cs">
+      <DependentUpon>OrderReport.vsrepx</DependentUpon>
+    </Compile>
+    <Compile Update="Reports\OrderReport.Designer.cs">
+      <DependentUpon>OrderReport.vsrepx</DependentUpon>
+    </Compile>
   </ItemGroup>
 
 

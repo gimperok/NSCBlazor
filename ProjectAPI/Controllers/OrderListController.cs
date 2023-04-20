@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using ProjectAPI.DBContext;
-using ProjectAPI.Models;
+using ProjectJson.Models;
 using System.Net.Http;
 using System.Text.Json;
 
@@ -18,105 +18,130 @@ namespace ProjectAPI.Controllers
             db = _db;
         }
 
-        [HttpGet] //ЗАКАЗ ПО ID
-        public async Task<OrderListDb> GetOrderById(int id)
+
+        /// <summary>
+        /// Получить заказ по его ID номеру
+        /// </summary>
+        /// <param name="id">Идентификатор заказа</param>
+        /// <returns>Заказ по его ID номеру</returns>
+        [HttpGet]
+        public async Task<OrderMessage> GetOrderById(int id)
         {
-            OrderListDb? orderList = db.OrderLists.Where(x => x.Id == id).FirstOrDefault();
+            OrderMessage? orderList = db.Orders.Where(x => x.Id == id).FirstOrDefault();
             return orderList;
         }
 
 
-
+        /// <summary>
+        /// Получить последний созданный заказ по ID клиента
+        /// </summary>
+        /// <param name="id">Идентификатор клиента</param>
+        /// <returns>Последний созданный заказ по ID клиента</returns>
         [HttpGet]
-        public OrderListDb GetLastCreatedOrderListByUserId(int id)
+        public OrderMessage GetLastCreatedOrderListByUserId(int id)
         {
-            OrderListDb orderList = new OrderListDb();
-            if (db.OrderLists.Any())
-                orderList = db.OrderLists.Where(x => x.ClientId == id).OrderByDescending(s => s.DateCreate).FirstOrDefault();
+            OrderMessage orderList = new OrderMessage();
+            if (db.Orders.Any())
+                orderList = db.Orders.Where(x => x.ClientId == id).OrderByDescending(s => s.DateCreate).FirstOrDefault();
 
-            //.Select(t => t).Where(x => x.ClientId == id).OrderByDescending(s => s.DateCreate)
-
-            //foreach(var str in)
-            //orderList.OrderStrings = db.OrderStrings.Where(x => x.)
             return orderList;
-
-            //if (OrderList == null)
-            //    return String.Empty;
-
-            //return JsonSerializer.Serialize(OrderList);
         }
 
 
+        /// <summary>
+        /// Получить список заказов клиента по его ID
+        /// </summary>
+        /// <param name="clientId">Идентификатор клиента</param>
+        /// <returns>Cписок заказов клиента по его ID</returns>
         [HttpGet]
-        public async Task<List<OrderListDb>> GetAllOrderListsByUserId(int clientId)
+        public async Task<List<OrderMessage>> GetAllOrderListsByUserId(int clientId)
         {
-            List<OrderListDb> orderLists = new List<OrderListDb>();
+            List<OrderMessage> orderLists = new List<OrderMessage>();
 
-            if (db.OrderLists.Any(x => x.ClientId == clientId))
+            if (db.Orders.Any(x => x.ClientId == clientId))
             {
-                orderLists = db.OrderLists.Where(x => x.ClientId == clientId).OrderByDescending(t => t).Select(r => r).ToList();                
+                orderLists = db.Orders.Where(x => x.ClientId == clientId).OrderByDescending(t => t).Select(r => r).ToList();                
             }
 
             return orderLists;
         }
 
 
+        /// <summary>
+        /// Получить список всех заказов из бд
+        /// </summary>
+        /// <returns>Cписок всех заказов</returns>
+        [HttpGet]
+        public async Task<List<OrderMessage>> GetAllOrdersFromDb()
+        {
+            List<OrderMessage> allOrders = db.Orders.OrderByDescending(x => x.Id).ToList();
+
+            foreach (var order in allOrders)
+            {
+                order.Client = db.Clients.Where(p => p.Id == order.ClientId).FirstOrDefault();
+                //if (db.OrderItems.Any(item => item.OrderId == ord.Id))
+                //order.OrderItems = db.OrderItems.Where(item => item.OrderId == order.Id).ToList();
+            }
+
+            return allOrders;
+        }
+
+
+        /// <summary>
+        /// Добавление заказа
+        /// </summary>
+        /// <param name="orderList">Обьект заказа</param>
+        /// <returns></returns>
         [HttpPost]
-        public bool AddOrder(OrderListDb orderList)
+        public bool AddOrder(OrderMessage orderList)
         {
             if (!ModelState.IsValid)
                 return false;
 
-            db.OrderLists.Add(orderList);
+            db.Orders.Add(orderList);
             db.SaveChanges();
             return true;
         }
 
 
+        /// <summary>
+        /// Изменение заказа
+        /// </summary>
+        /// <param name="orderList">Обьект заказа</param>
+        /// <returns></returns>
         [HttpPut]
-        public bool EditOrder(OrderListDb orderList)
+        public bool EditOrder(OrderMessage orderList)
         {
             if (!ModelState.IsValid)
                 return false;
 
-            var editOrderList = db.OrderLists.FirstOrDefault(p => p.Id == orderList.Id);
+            var editOrderList = db.Orders.FirstOrDefault(p => p.Id == orderList.Id);
 
             if (editOrderList == null)
                 return false;
 
             editOrderList.DateModify = orderList.DateModify;
-            editOrderList.OrderStrings = orderList.OrderStrings;
+            //editOrderList.OrderItems = orderList.OrderItems;
 
-            //foreach(var odrstr in orderList.OrderStrings)
-            //{
-            //    editOrderList.TotalPosition += odrstr.TotalCountPairs;
-            //    editOrderList.TotalPairs += odrstr.TotalCountPairs;
-
-            //    editOrderList.OrderTotalMoney += odrstr.TotalPrice;
-            //    editOrderList.OrderTotalMoney += odrstr.TotalPrice;
-
-            //}
-
-            //editOrderList.TotalPosition = orderList.TotalPosition;
-            ////editOrderList.TotalPosition = orderList.TotalPosition;
-            //editOrderList.TotalPairs = orderList.TotalPairs;
-            //editOrderList.OrderTotalMoney = orderList.OrderTotalMoney;
-            //editOrderList.Deposit = orderList.Deposit;
-
-            db.OrderLists.Update(editOrderList);
+            db.Orders.Update(editOrderList);
             db.SaveChanges();
             return true;
         }
 
 
+        /// <summary>
+        /// Удаление заказа
+        /// </summary>
+        /// <param name="id">Идентификатор заказа</param>
+        /// <returns></returns>
         [HttpDelete]
         public bool DeleteOrderListById(int id)
         {
-            var orderList = db.OrderLists.FirstOrDefault(p => p.Id == id);
+            var orderList = db.Orders.FirstOrDefault(p => p.Id == id);
             if (orderList == null)
                 return false;
 
-            db.OrderLists.Remove(orderList);
+            db.Orders.Remove(orderList);
             db.SaveChanges();
             return true;
         }

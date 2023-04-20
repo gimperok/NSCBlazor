@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using ProjectAPI.Models;
+using ProjectJson.Models;
 
 namespace ProjectAPI.DBContext
 {
@@ -10,17 +11,9 @@ namespace ProjectAPI.DBContext
         public ApplicationContext(DbContextOptions<ApplicationContext> options) : base(options) { }
 
 
-        public DbSet<ClientDb> Clients { get; set; }
-        public DbSet<OrderStringDb> OrderStrings { get; set; }
-        public DbSet<OrderListDb> OrderLists { get; set; }
+        public DbSet<ClientMessage> Clients { get; set; }
+        public DbSet<OrderItemMessage> OrderItems { get; set; }
+        public DbSet<OrderMessage> Orders { get; set; }
 
-
-        //protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        //{
-        //    if (!optionsBuilder.IsConfigured)
-        //    {
-        //        optionsBuilder.UseSqlite(AppSettings.ConnectionString);
-        //    }
-        //}
     }
 }

@@ -13,25 +13,25 @@ namespace ProjectJson.Models
         /// </summary>
         public int Id { get; set; }
 
-        [Required]
+        [Required(ErrorMessage = "* Обязательно для заполнения")]
         /// <summary>
         /// Имя клиента
         /// </summary>
         public string? Name { get; set; }
 
-        [Required]
+        [Required(ErrorMessage = "* Обязательно для заполнения")]
         /// <summary>
         /// Фамилия клиента
         /// </summary>
         public string? Surname { get; set; }
 
-        [Required]
+        [Required(ErrorMessage = "* Обязательно для заполнения")]
         /// <summary>
         /// Страна клиента
         /// </summary>
         public string? Country { get; set; }
 
-        [Required]
+        [Required(ErrorMessage = "* Обязательно для заполнения")]
         /// <summary>
         /// Город клиента
         /// </summary>
@@ -47,9 +47,16 @@ namespace ProjectJson.Models
         /// </summary>
         public string? Tel { get; set; }
 
+        public string FullName => $"{Name} {Surname}";
+
+        public DateTime DateRegistration { get; set; } = DateTime.Now;
+
+
         ///// <summary>
         ///// список заказов
         ///// </summary>
-        //public List<OrderListMessage>? OrderLists { get; set; }
+        //public List<OrderMessage>? Orders { get; set; }
+
+
     }
 }

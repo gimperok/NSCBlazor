@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace ProjectAPI.Migrations
 {
     /// <inheritdoc />
-    public partial class InitDb : Migration
+    public partial class InitialCreateDb : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -30,34 +30,33 @@ namespace ProjectAPI.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "OrderLists",
+                name: "Orders",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "INTEGER", nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
                     DateCreate = table.Column<DateTime>(type: "TEXT", nullable: true),
                     DateModify = table.Column<DateTime>(type: "TEXT", nullable: true),
-                    ClientId = table.Column<int>(type: "INTEGER", nullable: true),
-                    ClientDbId = table.Column<int>(type: "INTEGER", nullable: true)
+                    ClientId = table.Column<int>(type: "INTEGER", nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_OrderLists", x => x.Id);
+                    table.PrimaryKey("PK_Orders", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_OrderLists_Clients_ClientDbId",
-                        column: x => x.ClientDbId,
+                        name: "FK_Orders_Clients_ClientId",
+                        column: x => x.ClientId,
                         principalTable: "Clients",
                         principalColumn: "Id");
                 });
 
             migrationBuilder.CreateTable(
-                name: "OrderStrings",
+                name: "OrderItems",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "INTEGER", nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
-                    Kod = table.Column<string>(type: "TEXT", nullable: false),
-                    Leather = table.Column<string>(type: "TEXT", nullable: false),
+                    Kod = table.Column<string>(type: "TEXT", nullable: true),
+                    Leather = table.Column<string>(type: "TEXT", nullable: true),
                     Color = table.Column<string>(type: "TEXT", nullable: true),
                     Size35 = table.Column<int>(type: "INTEGER", nullable: false),
                     Size36 = table.Column<int>(type: "INTEGER", nullable: false),
@@ -66,40 +65,39 @@ namespace ProjectAPI.Migrations
                     Size39 = table.Column<int>(type: "INTEGER", nullable: false),
                     Size40 = table.Column<int>(type: "INTEGER", nullable: false),
                     Size41 = table.Column<int>(type: "INTEGER", nullable: false),
-                    Price = table.Column<double>(type: "REAL", nullable: true),
+                    Price = table.Column<double>(type: "REAL", nullable: false),
                     Note = table.Column<string>(type: "TEXT", nullable: true),
-                    OrderListId = table.Column<int>(type: "INTEGER", nullable: true),
-                    OrderListDbId = table.Column<int>(type: "INTEGER", nullable: true)
+                    OrderId = table.Column<int>(type: "INTEGER", nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_OrderStrings", x => x.Id);
+                    table.PrimaryKey("PK_OrderItems", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_OrderStrings_OrderLists_OrderListDbId",
-                        column: x => x.OrderListDbId,
-                        principalTable: "OrderLists",
+                        name: "FK_OrderItems_Orders_OrderId",
+                        column: x => x.OrderId,
+                        principalTable: "Orders",
                         principalColumn: "Id");
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_OrderLists_ClientDbId",
-                table: "OrderLists",
-                column: "ClientDbId");
+                name: "IX_OrderItems_OrderId",
+                table: "OrderItems",
+                column: "OrderId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_OrderStrings_OrderListDbId",
-                table: "OrderStrings",
-                column: "OrderListDbId");
+                name: "IX_Orders_ClientId",
+                table: "Orders",
+                column: "ClientId");
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "OrderStrings");
+                name: "OrderItems");
 
             migrationBuilder.DropTable(
-                name: "OrderLists");
+                name: "Orders");
 
             migrationBuilder.DropTable(
                 name: "Clients");

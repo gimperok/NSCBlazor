@@ -6,26 +6,31 @@
 
 main {
     flex: 1;
+    background-color: peachpuff;
 }
 
 .sidebar {
-    background-image: linear-gradient(180deg, rgb(5, 39, 103) 0%, #3a0647 70%);
+    /*background-image: linear-gradient(180deg, rgb(5, 39, 103) 0%, #3a0647 70%);*/
+    background-color: peachpuff; 
+    margin-top: 100px;
 }
 
-.test {
+.header {
+    z-index: 2;
     background-color: peachpuff;
-    border-bottom: 1px solid #d6d5d5;
-    
+    border-bottom: 2px solid black/*#d6d5d5*/;
     display: flex;
-    flex-direction:column;
+    flex-direction: column;
     align-items: flex-start;
+    min-width: fit-content;
+    width: 100vw;
+    height: 100px;
+    position: fixed;
+    top: 0;
+    margin-top: auto;
+    margin-bottom: auto;
+}
 
-    max-height: 100px;
-}
-.test-img {
-    align-self: center;
-    max-height: 100px;
-}
 
 .top-row {
     background-color: #f7f7f7;
@@ -71,9 +76,9 @@ main {
 
     .sidebar {
         width: 250px;
-        height: 100vh;
+        height: calc(100vh - 100px);
         position: sticky;
-        top: 0;
+        top: 100px;
     }
 
     .top-row {

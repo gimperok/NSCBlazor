@@ -41,6 +41,8 @@
                 => GetFromOrderListsSection<string>("GetLastCreatedOrderListByUserId");
                 public static string GetAllOrderListsByUserId
                 => GetFromOrderListsSection<string>("GetAllOrderListsByUserId");
+                public static string GetAllOrdersFromDb
+                => GetFromOrderListsSection<string>("GetAllOrdersFromDb");
                 public static string AddOrderList
                 => GetFromOrderListsSection<string>("AddOrderList");
                 public static string EditOrderList

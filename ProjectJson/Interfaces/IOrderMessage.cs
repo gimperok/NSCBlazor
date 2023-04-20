@@ -8,32 +8,32 @@ using System.Threading.Tasks;
 
 namespace ProjectJson.Interfaces
 {
-    public interface IOrderListMessage
+    public interface IOrderMessage
     {
         /// <summary>
         /// ид заказа
         /// </summary>
         public int Id { get; set; }
 
-        /// <summary>
-        /// Всего позиций в заказе
-        /// </summary>
-        public int? TotalPosition { get;}
+        ///// <summary>
+        ///// Всего позиций в заказе
+        ///// </summary>
+        //public int TotalPosition { get;}
 
-        /// <summary>
-        /// Всего пар в заказе
-        /// </summary>
-        public int? TotalPairs { get;}
+        ///// <summary>
+        ///// Всего пар в заказе
+        ///// </summary>
+        //public int TotalPairs { get;}
 
-        /// <summary>
-        /// Общая сумма заказа
-        /// </summary>
-        public double? OrderTotalMoney { get;}
+        ///// <summary>
+        ///// Общая сумма заказа
+        ///// </summary>
+        //public double OrderTotalMoney { get;}
 
-        /// <summary>
-        /// Депозит за данный заказ
-        /// </summary>
-        public double? Deposit{ get;}
+        ///// <summary>
+        ///// Депозит за данный заказ
+        ///// </summary>
+        //public double Deposit{ get;}
 
         /// <summary>
         /// Дата создания заказа

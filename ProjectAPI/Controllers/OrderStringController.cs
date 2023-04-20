@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using ProjectAPI.DBContext;
 using ProjectAPI.Models;
+using ProjectJson.Models;
 using System.Text.Json;
 
 namespace ProjectAPI.Controllers
@@ -19,38 +20,33 @@ namespace ProjectAPI.Controllers
 
 
         [HttpGet]
-        public List<OrderStringDb> GetAllStringsByOrderListId(int orderId)
+        public List<OrderItemMessage> GetAllStringsByOrderListId(int orderId)
         {
-            List<OrderStringDb> orderStringsList = new List<OrderStringDb>();
-            if (db.OrderStrings.Any(p => p.OrderListId == orderId))
-                orderStringsList = db.OrderStrings.Where(p => p.OrderListId == orderId).ToList();
+            List<OrderItemMessage> orderStringsList = new List<OrderItemMessage>();
+            if (db.OrderItems.Any(p => p.OrderId == orderId))
+                orderStringsList = db.OrderItems.Where(p => p.OrderId == orderId).ToList();
             return orderStringsList;
-
-            //if (orderStringsList.Count() == 0)
-            //    return String.Empty;
-
-            //return JsonSerializer.Serialize(orderStringsList);
         }
 
 
         [HttpPost]
-        public bool AddOrderString(OrderStringDb orderString)
+        public bool AddOrderString(OrderItemMessage orderString)
         {
             if (!ModelState.IsValid)
                 return false;
 
-            db.OrderStrings.Add(orderString);
+            db.OrderItems.Add(orderString);
             db.SaveChanges();
             return true;
         }
 
         [HttpPut]
-        public bool EditOrderString(OrderStringDb editedOrderString)
+        public bool EditOrderString(OrderItemMessage editedOrderString)
         {
             if (!ModelState.IsValid)
                 return false;
 
-            var currentOrderString = db.OrderStrings.FirstOrDefault(p => p.Id == editedOrderString.Id);
+            var currentOrderString = db.OrderItems.FirstOrDefault(p => p.Id == editedOrderString.Id);
 
             if (currentOrderString == null)
                 return false;
@@ -71,7 +67,7 @@ namespace ProjectAPI.Controllers
             currentOrderString.Note = editedOrderString.Note;
 
 
-            db.OrderStrings.Update(currentOrderString);
+            db.OrderItems.Update(currentOrderString);
             db.SaveChanges();
             return true;
         }
@@ -80,11 +76,11 @@ namespace ProjectAPI.Controllers
         [HttpDelete]
         public bool DeleteOrderStringById(int id)
         {
-            var orderString = db.OrderStrings.FirstOrDefault(p => p.Id == id);
+            var orderString = db.OrderItems.FirstOrDefault(p => p.Id == id);
             if (orderString == null)
                 return false;
 
-            db.OrderStrings.Remove(orderString);
+            db.OrderItems.Remove(orderString);
             db.SaveChanges();
             return true;
         }
@@ -92,13 +88,13 @@ namespace ProjectAPI.Controllers
         [HttpDelete]
         public bool DeleteAllStringsForOrder(int id)
         {
-            var stringList = db.OrderStrings.Where(p => p.OrderListId == id).ToList();
+            var stringList = db.OrderItems.Where(p => p.OrderId == id).ToList();
 
             if(stringList is not null && stringList.Count !=0)
             {
                 foreach(var str in stringList)
                 {
-                    db.OrderStrings.Remove(str);
+                    db.OrderItems.Remove(str);
                 }
             }
 

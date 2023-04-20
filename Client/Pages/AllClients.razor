@@ -1,4 +1,4 @@
-﻿@page "/AllClients"
+﻿@page "/clients"
 @using NSCBlazor.Shared
 @using NSCBlazor.Shared.Models
 @inject HttpClient Http
@@ -7,117 +7,157 @@
 
 <PageTitle>AllClients</PageTitle>
 
+<style>
+    .order-item {
+        display: flex;
+        /*background: linen;*/
+        background-color: rgba(250,240,230,0.75);
+        border: 2px solid whitesmoke;
+        border-radius: 12px;
+        color: black;
+        margin: 10px auto 30px auto;
+        padding: 10px;
+    }
+
+    .order-item:hover {
+        background-color: rgba(250,240,230,1.0);
+        border: 2px solid black;
+    }
+    .delClient-btn{
+        float:right;
+    }
+
+    .delClient-btn:hover {
+        color: indianred;
+        float: right;
+    }
+
+    .otherSmall-btn:hover{
+        color:gray;
+    }
+    .textBox-search{
+        width:100%;
+        margin: 10px 5px;
+/*        margin-right: 5px;
+        margin-top: 10px;
+        margin-bottom: 10px;*/
+    }
+    .search-btn{
+        margin-top: 10px;
+    }
+
+    .forSpan-center{
+        display: flex;
+        justify-content: center;
+    }
+</style>
+
+<div style="flex-direction: column; width:100%;">
+    <span style="display: flex; justify-content: center; margin-left:auto;margin-right:auto; font-weight: bold;">Список клиентов</span>
+    <div style="width:30%; max-width: 350px; min-width: 200px;display: flex; justify-content: center; margin-left:auto;margin-right:auto;">
+
+        <DxTextBox Text="@SearchQuery"
+                   NullText="Поиск..."
+                   ClearButtonDisplayMode="DataEditorClearButtonDisplayMode.Auto"
+                   CssClass="textBox-search"
+                   TextChanged="@((textQuery) => OnTextChanged(textQuery))" />
+    </div>
+</div>
 
 
-
-
-
-@if (allClients == null)
+@if (@clientsForShow == null)
 {
-    <p>Загрузка клиентов...</p>
+    <div>
+        <span class="forSpan-center">Загрузка клиентов...</span>
+    </div>
 }
-else if (allClients.Count == 0)
+else if (clientsForShow.Count == 0)
 {
-    <p>Список клиентов пуст!</p>
+    <div><span class="forSpan-center">Список клиентов пуст!</span></div>
 }
 else
 {
-    <h3>Список клиентов:</h3>
-    foreach (var client in allClients)
+    foreach (var client in clientsForShow.OrderByDescending(client => client.DateRegistration))
     {
-        <p>
-            <span>Имя:</span>
-            <span>@client.Name</span>
-        </p>
-        <p>                        
-            <span>Фамилия:</span>
-            <span>@client.Surname</span>
-        </p>
-        <p> 
-            <span>Страна:</span>
-            <span>@client.Country</span>
-        </p>
-        <p>            
-            <span>Город:</span>
-            <span>@client.City</span>
-        </p>
-        <p>
-            <button onclick="@(() => DeleteClient(client.Id))">Del</button>
-            <button style="margin-left:10px;" onclick="@(() => CreateOrder(client))">Создать заказ</button>
+        <div class="order-item mt-3" style="flex-direction: column; max-width: 450px; min-width:300px;">
+            <div style="flex-direction:row">
+                <label style="font-weight: 600;">@client.Name @client.Surname @client.City</label>
+                <DxButton RenderStyle="ButtonRenderStyle.None"
+                  title="Редактировать клиента"
+                  CssClass="fa fa-pencil otherSmall-btn"
+                  Click="@(() => EditClient(client.Id))" />
 
-        </p>
-        <hr/>
+
+                <DxButton RenderStyle="ButtonRenderStyle.None"
+                  title="Удалить клиента"
+                  CssClass="fa fa-trash delClient-btn"
+                  Click="@(() => DeleteClient(client.Id))" />
+            </div>
+
+            <span style="font-style: italic;">@client.Tel</span>
+            <hr/>
+            <label>@client.Country: @client.Cargo</label>
+            <div style="flex-direction:row">
+                <DxButton RenderStyle="ButtonRenderStyle.None"
+                  title="Создать заказ"
+                  CssClass="fa fa-file-text otherSmall-btn"
+                  Click="@(() => NavigToCreateOrderForThisClient(client))" />
+            </div>
+
+        </div>
     }
 }
 
 
 
 @code {
-    private WeatherForecast[]? forecasts;
+    private string SearchQuery { get; set; } = string.Empty;
 
+    List<Client> allClients;
+    List<Client> clientsForShow;
 
     protected override async Task OnInitializedAsync()
     {
-        forecasts = await Http.GetFromJsonAsync<WeatherForecast[]>("WeatherForecast");
-        //client = await Http.GetFromJsonAsync<Client>("https:localhost:7145/api/Client/GetClientById?id=1");
-
-        /*await GetClient(4);*/   //ЭТО РАБОТАЕТ ТОЛЬКО ID нужно имеющийся
-
         await GetAllClient();
 
+        clientsForShow = new();
+        clientsForShow.AddRange(allClients);
     }
 
-    Client? clientForShow;
-    private async Task GetClient(int id)
-    {
-        clientForShow = await Http.GetFromJsonAsync<Client>("https://localhost:7256/Client/GetClientById?id="+id);
-
-        //почему так не работает?
-        //var resp = await Http.SendAsync(new HttpRequestMessage(HttpMethod.Get, "https:localhost:7145/Client/GetClientById?id=1"));
-        //clientForShow = JsonSerializer.Deserialize<Client>(resp.Content.ToString());
-    }
-
-    List<Client> allClients;
     private async Task GetAllClient()
     {
         allClients = await Http.GetFromJsonAsync<List<Client>>("https://localhost:7256/Client/GetAllClients");
         StateHasChanged();
     }
 
-
-
-
-
-    Client clientForAdd = new Client();
-    private async Task AddClient(Client clientadd)
+    private async Task EditClient(int clientId)
     {
-        var resp = await Http.PostAsJsonAsync("https://localhost:7256/Client/AddClient", clientadd);
-        if (resp.IsSuccessStatusCode)
-            clientadd = null;
-        await GetAllClient();
-
+        NavigationManager.NavigateTo($"/Client/{clientId}");
     }
-
 
     private async Task DeleteClient(int id)
     {
         var resp = await Http.DeleteAsync("https://localhost:7256/Client/DeleteClient?id="+ id);
 
         await GetAllClient();
+        clientsForShow = allClients;
     }
 
-
-    private async Task CreateOrder(Client client)
+    private async Task NavigToCreateOrderForThisClient(Client client)
     {
-        OrderList orderList = new OrderList();
-        orderList.ClientId = client.Id;
-        orderList.DateCreate = DateTime.UtcNow;
-
-        var resp = await Http.PostAsJsonAsync("https://localhost:7256/OrderList/AddOrderList", orderList);
-        
-        if(resp.IsSuccessStatusCode)
-            NavigationManager.NavigateTo($"/CreateorderList/{client.Id}");
+        NavigationManager.NavigateTo($"/OrderForClient/{client.Id}");
     }
 
+    private void OnTextChanged(string SearchQuery)
+    {
+        clientsForShow = new();
+        clientsForShow.AddRange(allClients);
 
+        if (SearchQuery?.Length > 2)
+        {
+            clientsForShow.RemoveAll(x => x?.Name?.ToLower().Contains(SearchQuery.ToLower()) == false &&
+                                          x?.Surname?.ToLower().Contains(SearchQuery.ToLower()) == false &&
+                                          x?.City?.ToLower().Contains(SearchQuery.ToLower()) == false);
+        }
+    }
 }

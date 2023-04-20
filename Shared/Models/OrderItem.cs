@@ -5,9 +5,9 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace NSCBlazor.Shared.Models
 {
     /// <summary>
-    /// Класс описывающий клиента
+    /// Класс описывающий строку заказа
     /// </summary>
-    public class Client: ClientMessage
+    public class OrderItem : OrderItemMessage
     {
 
     }

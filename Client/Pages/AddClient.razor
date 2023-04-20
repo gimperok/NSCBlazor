@@ -1,66 +1,124 @@
-﻿@page "/addClient/{clientId:int?}"
+﻿@page "/Client/{clientId:int?}"
 
 @using NSCBlazor.Shared
 @using NSCBlazor.Shared.Models
+@using System.ComponentModel.DataAnnotations
 
 @inject IJSRuntime JSRuntime
 @inject HttpClient Http
 @inject NavigationManager NavigationManager
 
 
-<style>.notif-show{display: none;}</style>
+<style>
+    .notif-show {
+        display: none;
+    }
 
-<hr />
+    .btn-save {
+        background-color: rgba(250,240,230,0.75);
+        border: 2px solid whitesmoke;     
+        color:black;
+        margin: 0 40%;
+        
+    }
 
-<h3>@AddOrEditLabel</h3>
+    .btn-save:hover {
+        background-color: rgba(250,240,230,1);
+        border: 2px solid black;
+        margin: 0 40%;
+    }
+    .height55{
+        height: 55px;
+    }
+</style>
 
-<DxFormLayout CssClass="w-25">
-    <DxFormLayoutItem ColSpanMd="12" Caption="Имя">
-        <DxTextBox @bind-Text="@client.Name" />
-    </DxFormLayoutItem>
 
-    <DxFormLayoutItem ColSpanMd="12" Caption="Фамилия">
-        <DxTextBox @bind-Text="@client.Surname" CssClass="cw-320" />
-    </DxFormLayoutItem>
 
-    <DxFormLayoutItem ColSpanMd="12" Caption="Страна">
-        <DxTextBox @bind-Text="@client.Country" CssClass="cw-320" />
-    </DxFormLayoutItem>
+<h3 class="mt-5">@AddOrEditLabel</h3>
 
-    <DxFormLayoutItem ColSpanMd="12" Caption="Город">
-        <DxTextBox @bind-Text="@client.City" CssClass="cw-320" />
-    </DxFormLayoutItem>
+<div class="d-flex flex-row" style="width:100%;">
+    <div style="width: 30%;
+                min-width: 365px;
+                margin: 0 10px 0px 0;">
+        <i class="@iconPeople" style="color: rgba(250,240,230,0.75); font-size:250pt;"></i>
+    </div>
 
-</DxFormLayout>
+    <div style="width: 50%;
+                min-width: 350px;
+                margin: 0 auto 0px 0;">
+        <EditForm Model="@client"
+                  OnValidSubmit="@HandleValidSubmit"
+                  OnInvalidSubmit="@HandleInvalidSubmit"
+                  Context="EditFormContext">
+            <DataAnnotationsValidator />
 
-<p>
-     <DxButton RenderStyle="ButtonRenderStyle.Primary"
-               Text="@labelButton"
-               CssClass="w-25" 
-               Click="@(() => SaveClient_Click(client))"/>
-</p>
-<span class="notifShow" style="display: none; color: green;">@notifMessage</span>
+                <DxFormLayout CssClass="w-75">
+                    <DxFormLayoutItem ColSpanMd="12" Caption="Имя" CssClass="height55">
+                        <DxTextBox @bind-Text="@client.Name" />
+                        <ValidationMessage For="@(() => client.Name)" />
+                    </DxFormLayoutItem>
 
-<hr />
+                    <DxFormLayoutItem ColSpanMd="12" Caption="Фамилия" CssClass="height55">
+                        <DxTextBox @bind-Text="@client.Surname" />
+                        <ValidationMessage For="@(() => client.Surname)" />
+                    </DxFormLayoutItem>
+
+                    <DxFormLayoutItem ColSpanMd="12" Caption="Страна" CssClass="height55">
+                        <DxTextBox @bind-Text="@client.Country" CssClass="cw-320" />
+                        <ValidationMessage For="@(() => client.Country)" />
+                    </DxFormLayoutItem>
+
+                    <DxFormLayoutItem ColSpanMd="12" Caption="Город" CssClass="height55">
+                        <DxTextBox @bind-Text="@client.City" CssClass="cw-320" />
+                        <ValidationMessage For="@(() => client.City)" />
+                    </DxFormLayoutItem>
+
+                    <DxFormLayoutItem ColSpanMd="12" Caption="Карго" CssClass="height55">
+                        <DxTextBox @bind-Text="@client.Cargo" CssClass="cw-320" />
+                    </DxFormLayoutItem>
+
+                    <DxFormLayoutItem ColSpanMd="12" Caption="Тел." CssClass="height55">
+                        <DxTextBox @bind-Text="@client.Tel" CssClass="cw-320" />
+                    </DxFormLayoutItem>
+
+
+                    <DxButton SubmitFormOnClick="true"
+                              RenderStyle="ButtonRenderStyle.None"
+                              Text="@labelButton"
+                              CssClass="w-25 btn-save" />
+                </DxFormLayout>
+
+        </EditForm>
+    </div>
+</div>
+
+
+<div>
+    <span class="notifShow mt-3" style="display: none; justify-content: center; color: green;">@notifMessage</span>
+</div>
+
+
 
 @code {
     [Parameter]
     public int clientId { get; set; }
 
     Client client = new Client();
-    private string? AddOrEditLabel, labelButton, notifMessage;
+    private string? AddOrEditLabel, labelButton, notifMessage, iconPeople;
 
 
     protected override async Task OnInitializedAsync()
     {
-        if(clientId > 0)
+        if (clientId > 0)
         {
             await LoadClient(clientId);
             AddOrEditLabel = "Изменить клиента:";
+            iconPeople = "fa fa-user";
         }
         else
         {
             AddOrEditLabel = "Добавить клиента:";
+            iconPeople = "fa fa-user-plus";
         }
         labelButton = "Сохранить";
     }
@@ -78,12 +136,13 @@
         {
             response = await Http.PutAsJsonAsync("https://localhost:7256/Client/EditClient", client);
             if (response.IsSuccessStatusCode)
-            {   notifMessage = "Данные пользователь успешно обновлены!";             
+            {
+                notifMessage = "Данные пользователя успешно обновлены!";
                 await JSRuntime.InvokeVoidAsync("ShowNotification", "notifShow");
                 StateHasChanged();
             }
             await Task.Run(() => System.Threading.Thread.Sleep(2200));
-            NavigationManager.NavigateTo("");
+            NavigationManager.NavigateTo("/AllClients");
         }
     }
 
@@ -91,4 +150,12 @@
     {
         client = await Http.GetFromJsonAsync<Client>($"https://localhost:7256/Client/GetClientById?id={clientId}");
     }
+
+    #region EmptyMethodForValidation
+    private void HandleValidSubmit()
+    {
+        SaveClient_Click(client);
+    }
+    private void HandleInvalidSubmit() { }
+    #endregion
 }

@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using ProjectAPI.DBContext;
-using ProjectAPI.Models;
+using ProjectJson.Models;
 using System.Text.Json;
 
 namespace ProjectAPI.Controllers
@@ -19,23 +19,18 @@ namespace ProjectAPI.Controllers
 
 
         [HttpGet]
-        public List<ClientDb> GetAllClients() => db.Clients.ToList();
+        public List<ClientMessage> GetAllClients() => db.Clients.ToList();
 
         [HttpGet]
-        public ClientDb GetClientById(int id)
-        {
-
+        public ClientMessage GetClientById(int id)
+        {            
             var client = db.Clients.FirstOrDefault(p => p.Id == id);
             return client;
-            //if(client == null)
-            //    return String.Empty;
-
-            //return JsonSerializer.Serialize(client).ToString();
         }
 
 
         [HttpPost]
-        public bool AddClient(ClientDb client)
+        public bool AddClient(ClientMessage client)
         {
             if (!ModelState.IsValid)
                 return false;
@@ -47,7 +42,7 @@ namespace ProjectAPI.Controllers
 
 
         [HttpPut]
-        public bool EditClient(ClientDb client)
+        public bool EditClient(ClientMessage client)
         {
             if (!ModelState.IsValid)
                 return false;
@@ -64,7 +59,6 @@ namespace ProjectAPI.Controllers
             editClient.Cargo = client.Cargo;
             editClient.Tel = client.Tel;
 
-            //editClient = client;
             db.Clients.Update(editClient);
             db.SaveChanges();
             return true;
@@ -82,6 +76,5 @@ namespace ProjectAPI.Controllers
             db.SaveChanges();
             return true;
         }
-
     }
 }

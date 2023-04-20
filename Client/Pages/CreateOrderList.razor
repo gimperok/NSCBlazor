@@ -1,227 +1,331 @@
-﻿@page "/Order/{clientId:int?}/{orderId:int?}"
+﻿@page "/Order/{orderId:int?}"
+@page "/OrderForClient/{testClientid:int}/{orderId:int?}"
 
 
-@using NSCBlazor.Shared
-@using NSCBlazor.Shared.Models
+@using NSCBlazor.Shared.Models;
+@using ProjectJson.Models
+
 @inject HttpClient Http
+@inject NavigationManager NavigationManager
 
 <style>
     table, th, tr, td {
         border: solid 1px;
         border-collapse: collapse;
     }
-/*    th, td{
-        width: 7%;
-    }*/
 
-    table
-    {
+    table {
+        width: 100%;
+    }
+
+    col, th, td {
+        text-align: center;
+    }
+
+    input {
+        width: 100%;
+    }
+
+    .blackColor {
+        color: black;
+    }
+
+    .hideLabel {
+        color: transparent;
+    }
+
+    .order-item{
+        background-color: rgba(250,240,230,0.75);
+        border: 2px solid whitesmoke;
+        border-radius: 7px;
+        color: black;
+        margin: 15px auto 15px auto;
+        padding: 3px 10px;
+        width: fit-content;
+    }
+    .order-item:hover {
+        cursor: pointer;
+        background-color: rgba(250,240,230,1.0);
+        border: 2px solid black;
+    }
+
+    .del-red:hover {
+        color: indianred;
+    }
+
+    .dxbs-grid>.card>.card-body, .dxbs-grid>.card>.card-header, .dxbs-grid>.card>.card-footer {
+        background-color: peachpuff;
+    }
+
+    .page-link {
+        background: peachpuff;
+        border-color: black;
+        color: black;
+        border-width: 2px;
+    }
+
+    .page-item.active .page-link {
+        background-color: peachpuff;
+        border-color: black;
+        font-weight: 600;
+    }
+
+    .dx-test-table{
         width:100%;
     }
 
-    col, th, td
-    {
-        width: 7%;
-        text-align: center;    
+    .my-grid .dxbs-grid-empty-data {
+        opacity: 0;
     }
-    input
-    {
-        width: 100%;
+
+    /*шапка таблицы*/
+    .dxbs-grid > .card .dxbs-scroll-viewer:first-child > .dxbs-scroll-viewer-content > .dxbs-grid-table > colgroup + thead > tr:first-child {
+        /*background-color: rgba(250,240,230,1);*/
+        background-color: blanchedalmond;
+        border:2px solid black;
     }
+
+    /*Тело таблицы*/
+    .table-bordered > :not(caption) > * {
+    /*background-color: rgba(250,240,230,0.50);*/    
+        background-color: oldlace;
+    }
+
+    /*ячейки строки ввода*/
+    .dxbs-input-group.input-group input.form-control, .item-theme {
+        background: oldlace;
+        text-align: center;
+    }
+
+    .wid3 {width:3%;} .wid4 {width: 4%;} .wid5 {width:5%;}
 </style>
 
 
 
 
-
-
-@if (orderList is not null && orderString is not null)
+@if (selectedClient is null && testClientid == 0)
 {
-    <h3>Заказ №@orderList.Id</h3>
-       <div class="row mt-3" >
-            <div class="col text-center">
-                <label>Kod:</label>
-            </div>
-            <div class="col">
-                <label>Leather:</label>
-            </div>
-            <div class="col">
-                <label>Color:</label>
-            </div>
-            <div class="col">
-                <label>35:</label>
-            </div>
-            <div class="col">
-                <label>36:</label>
-            </div>
-            <div class="col">
-                <label>37:</label>
-            </div>
-            <div class="col">
-                <label>38:</label>
-            </div>
-            <div class="col">
-                <label>39:</label>
-            </div>
-            <div class="col">
-                <label>40:</label>
-            </div>
-            <div class="col">
-                <label>41:</label>
-            </div>
-            <div class="col">
-                <label>TotalCountPairs:</label>
-            </div>
-            <div class="col">
-                <label>Price:</label>
-            </div>
-            <div class="col">
-                <label>TotalPrice:</label>
-            </div>
-            <div class="col">
-                <label>Note:</label>
-            </div>
+    <DxComboBox Data="@allClients"
+                NullText="Выбрать клиента"
+                FilteringMode="DataGridFilteringMode.Contains"
+                TextFieldName="@nameof(Client.FullName)"
+                Value="@selectedClient"
+                CssClass="w-25 ml-27"
+                ValueChanged="@((Client client) => SelectedClientChanged(client))" />
+}
+else
+{
+    <div class="d-flex justify-content-between">
+        <div class="d-flex flex-row">
+            <label class="@GetFontColorClass(selectedClient?.FullName)" style="font-weight: 600;">@selectedClient?.FullName</label>
+            <span style="display:@VisibleChangeClient()">
+                <DxButton RenderStyle="ButtonRenderStyle.None"
+                                  title="Сменить клиента"
+                                  CssClass="fa fa-times-circle"
+                                  Click="ChangeClientBtn_Click" />
+            </span>
         </div>
-
-    
-        <div class="row mt-3  text-center">
-            <div class="col">
-                <input @bind="orderString.Kod">
-            </div>
-            <div class="col">
-                <input @bind="orderString.Leather">
-            </div>
-            <div class="col">
-                <input @bind="orderString.Color">
-            </div>
-            <div class="col">
-                <input @bind="orderString.Size35">
-            </div>
-            <div class="col">
-                <input @bind="orderString.Size36">
-            </div>
-            <div class="col">
-                <input @bind="orderString.Size37">
-            </div>
-            <div class="col">
-                <input @bind="orderString.Size38">
-            </div>
-            <div class="col">
-                <input @bind="orderString.Size39">
-            </div>
-            <div class="col">
-                <input @bind="orderString.Size40">
-            </div>
-            <div class="col">
-                <input @bind="orderString.Size41">
-            </div>
-            <div class="col">
-                <span>@orderString.TotalCountPairs</span>
-            </div>
-            <div class="col">
-                <input @bind="orderString.Price">
-            </div>
-            <div class="col">
-                <span>@orderString.TotalPrice</span>
-            </div>
-            <div class="col">
-                <input @bind="orderString.Note">
-            </div>
-        </div>
-        
-    <button class="mt-3" @onclick="(()=>AddString())">Добавить строку</button>
-
-    @if (orderList.OrderStrings.Count!=0)
-    {
-        <hr />
-
-
         <div>
-            <span><b>Лист заказа:</b></span>
-
-            <div style="display:flex; ">
-                <table style="margin: 0 auto;width: 100%;">
-                    <tr>
-                        <th>Kod</th>
-                        <th>Leather</th>
-                        <th>Color</th>
-                        <th>35</th>
-                        <th>36</th>
-                        <th>37</th>
-                        <th>38</th>
-                        <th>39</th>
-                        <th>40</th>
-                        <th>41</th>
-                        <th>TotalPair</th>
-                        <th>Price</th>
-                        <th>TotalPrice</th>
-                        <th>Note</th>
-                        <th></th>
-                    </tr>
-                    @if (orderList?.OrderStrings?.Count != 0 || orderList.OrderStrings is not null)
-                    {
-                        @foreach (var ordStr in orderList?.OrderStrings.OrderByDescending(str => str.Id))
-                        {
-                            <tr>
-                                <td>@ordStr.Kod</td>
-                                <td>@ordStr.Leather</td>
-                                <td>@ordStr.Color</td>
-                                <td>@ordStr.Size35</td>
-                                <td>@ordStr.Size36</td>
-                                <td>@ordStr.Size37</td>
-                                <td>@ordStr.Size38</td>
-                                <td>@ordStr.Size39</td>
-                                <td>@ordStr.Size40</td>
-                                <td>@ordStr.Size41</td>
-                                <td>@ordStr.TotalCountPairs</td>
-                                <td>@ordStr.Price</td>
-                                <td>@ordStr.TotalPrice</td>
-                                <td>@ordStr.Note</td>
-                                <td><button @onclick="(()=>DelString(ordStr))">Del</button></td>
-                            </tr>
-                        }
-                    }
-                </table>
-            </div>
+            <label class="@GetFontColorClass(order.Id)" style="font-weight: 600;">Заказ № @order?.Id</label>
         </div>
+        <div>
+            <label style="font-weight: 600;" >@order?.DateCreate?.ToString("dd.MM.yyyy")</label>
+        </div>
+    </div>
+}
 
 
 
+@if (order != null && orderString != null)
+{
+  
+
+    <table style="width:100%; margin-top:10px;">
+        <tr>
+            <th><span class="text-center">Код</span></th>
+            <th><span class="text-center">Кожа</span></th>
+            <th><span class="text-center">Цвет</span></th>
+                      
+            <th><span class="text-center">35</span></th>
+            <th><span class="text-center">36</span></th>
+            <th><span class="text-center">37</span></th>
+            <th><span class="text-center">38</span></th>
+            <th><span class="text-center">39</span></th>
+            <th><span class="text-center">40</span></th>
+            <th><span class="text-center">41</span></th>
+
+            <th><span class="text-center">Пар</span></th>
+            <th><span class="text-center">Цена</span></th>
+            <th><span class="text-center">Итого</span></th>
+            <th><span class="text-center">Заметка</span></th>
+        </tr>
+
+        <tr>
+            <td style="width:10%;">
+                <DxTextBox @bind-Text="@orderString.Kod"
+                   NullText=""/>
+            </td>
+            <td style="width:14%;">
+                <DxTextBox @bind-Text="@orderString.Leather"
+                       NullText=""/>
+            </td>
+            <td style="width:14%;">
+                <DxTextBox @bind-Text="@orderString.Color"
+                       NullText=""/>
+            </td>
+            <td class="wid3">
+                <DxSpinEdit @bind-Value="@orderString.Size35" ShowSpinButtons="false"></DxSpinEdit>
+            </td>                                            
+            <td class="wid3">                                
+                <DxSpinEdit @bind-Value="@orderString.Size36" ShowSpinButtons="false"></DxSpinEdit>
+            </td>                                            
+            <td class="wid3">                                
+                <DxSpinEdit @bind-Value="@orderString.Size37" ShowSpinButtons="false"></DxSpinEdit>
+            </td>                                            
+            <td class="wid3">                                
+                <DxSpinEdit @bind-Value="@orderString.Size38" ShowSpinButtons="false"></DxSpinEdit>
+            </td>                                            
+            <td class="wid3">                                
+                <DxSpinEdit @bind-Value="@orderString.Size39" ShowSpinButtons="false"></DxSpinEdit>
+            </td>                                            
+            <td class="wid3">                                
+                <DxSpinEdit @bind-Value="@orderString.Size40" ShowSpinButtons="false"></DxSpinEdit>
+            </td>                                            
+            <td class="wid3">                                
+                <DxSpinEdit @bind-Value="@orderString.Size41" ShowSpinButtons="false"></DxSpinEdit>
+            </td>
+
+            <td class="wid4 item-theme">
+                <span>@orderString.TotalCountPairs</span>
+            </td>
+
+            <td class="wid4">
+                <DxSpinEdit @bind-Value="@orderString.Price" CssClass="item-theme" ShowSpinButtons="false"></DxSpinEdit>
+            </td>
+
+            <td class="wid5 item-theme">
+                <span>@orderString.TotalPrice</span>
+            </td>
+
+            <td style="width:26%;">
+                <DxTextBox @bind-Text="@orderString.Note"
+                       NullText=""/>
+            </td>
+        </tr>
+    </table>
+
+
+    <div @onclick="(()=>AddString())" class="order-item" >
+        <i class="fa fa-plus" style="margin-right:5px;" />
+        <span>Добавить строку</span>
+    </div>
+   
+    @if (order?.OrderItems?.Count != 0)
+    {
+        <DxGrid Data="@order?.OrderItems?.OrderByDescending(x =>x.Id)" 
+                PageSize="15"
+                CssClass="general-grid dx-test-table my-grid">
+            <Columns>
+                <DxGridDataColumn FieldName=@nameof(OrderItem.Kod) Caption="Код"      Width="10%" TextAlignment="GridTextAlignment.Center" />
+                <DxGridDataColumn FieldName=@nameof(OrderItem.Leather) Caption="Кожа" Width="15%" TextAlignment="GridTextAlignment.Center" />
+                <DxGridDataColumn FieldName=@nameof(OrderItem.Color) Caption="Цвет"   Width="15%" TextAlignment="GridTextAlignment.Center" />   @*40*@
+                                                                                               
+                <DxGridDataColumn FieldName=@nameof(OrderItem.Size35)  Caption="35"   Width="2%" TextAlignment="GridTextAlignment.Center">
+                    <CellDisplayTemplate>
+                        @{
+                            string displayShow = (Convert.ToInt32(context?.Value) == 0) ? "" : context?.Value.ToString();
+                        }
+                        <span>@displayShow</span>
+                    </CellDisplayTemplate>
+                </DxGridDataColumn>
+
+                <DxGridDataColumn FieldName=@nameof(OrderItem.Size36)  Caption="36"   Width="3%" TextAlignment="GridTextAlignment.Center">                        
+                    <CellDisplayTemplate>
+                        @{
+                            string displayShow = (Convert.ToInt32(context?.Value) == 0) ? "" : context?.Value.ToString();
+                        }
+                        <span>@displayShow</span>
+                    </CellDisplayTemplate>
+                </DxGridDataColumn>
+
+                <DxGridDataColumn FieldName=@nameof(OrderItem.Size37)  Caption="37"   Width="3%" TextAlignment="GridTextAlignment.Center">                        
+                    <CellDisplayTemplate>
+                        @{
+                            string displayShow = (Convert.ToInt32(context?.Value) == 0) ? "" : context?.Value.ToString();
+                        }
+                        <span>@displayShow</span>
+                    </CellDisplayTemplate>
+                </DxGridDataColumn>
+
+                <DxGridDataColumn FieldName=@nameof(OrderItem.Size38)  Caption="38"   Width="3%" TextAlignment="GridTextAlignment.Center">                        
+                    <CellDisplayTemplate>
+                        @{
+                            string displayShow = (Convert.ToInt32(context?.Value) == 0) ? "" : context?.Value.ToString();
+                        }
+                        <span>@displayShow</span>
+                    </CellDisplayTemplate>
+                </DxGridDataColumn>
+
+                <DxGridDataColumn FieldName=@nameof(OrderItem.Size39)  Caption="39"   Width="3%" TextAlignment="GridTextAlignment.Center">                        
+                    <CellDisplayTemplate>
+                        @{
+                            string displayShow = (Convert.ToInt32(context?.Value) == 0) ? "" : context?.Value.ToString();
+                        }
+                        <span>@displayShow</span>
+                    </CellDisplayTemplate>
+                </DxGridDataColumn>
+
+                <DxGridDataColumn FieldName=@nameof(OrderItem.Size40)  Caption="40"   Width="3%" TextAlignment="GridTextAlignment.Center">                        
+                    <CellDisplayTemplate>
+                        @{
+                            string displayShow = (Convert.ToInt32(context?.Value) == 0) ? "" : context?.Value.ToString();
+                        }
+                        <span>@displayShow</span>
+                    </CellDisplayTemplate>
+                </DxGridDataColumn>
+
+                <DxGridDataColumn FieldName=@nameof(OrderItem.Size41)  Caption="41"   Width="2%" TextAlignment="GridTextAlignment.Center">                         <CellDisplayTemplate>
+                        @{
+                            string displayShow = (Convert.ToInt32(context?.Value) == 0) ? "" : context?.Value.ToString();
+                        }
+                        <span>@displayShow</span>
+                    </CellDisplayTemplate>
+                </DxGridDataColumn>  @*19*@  @*59*@
+
+                <DxGridDataColumn FieldName=@nameof(OrderItem.TotalCountPairs)  Caption="Пар" Width="4%" TextAlignment="GridTextAlignment.Center"/>  
+                <DxGridDataColumn FieldName=@nameof(OrderItem.Price)            Caption="Цена"      Width="5%" TextAlignment="GridTextAlignment.Center"/>
+                <DxGridDataColumn FieldName=@nameof(OrderItem.TotalPrice)       Caption="Итого"  Width="5%" TextAlignment="GridTextAlignment.Center"/>    @*73*@
+                <DxGridDataColumn FieldName=@nameof(OrderItem.Note) Caption="Заметка" Width="24%" TextAlignment="GridTextAlignment.Center" />
+                
+                <DxGridCommandColumn Width="3%">
+                    <HeaderTemplate>
+                        <DxButton RenderStyle="ButtonRenderStyle.None"
+                          title="Отправить на печать"
+                          CssClass="fa fa-print" 
+                          Click="SetAndNavigateToURL" />
+                    </HeaderTemplate>
+                    <CellDisplayTemplate>
+                        <DxButton RenderStyle="ButtonRenderStyle.None"
+                          title="Удалить строку"
+                          CssClass="fa fa-trash del-red" 
+                          Click="@(() => DelString(context.DataItem as OrderItem))" />
+                    </CellDisplayTemplate>
+                </DxGridCommandColumn>
+
+            </Columns>
+        </DxGrid>
 
         <hr />
-        <div style="display:block; float:right;">
-            <span><b>Инфа по заказу:</b></span>
-            <div>
-                <label>Заказ: </label>
-                <label>#@orderList.Id</label>
+        <div class="d-flex justify-content-between">
+            <div class="d-flex flex-column">
+                <span style="font-weight:600;font-style: italic;">Позиций: @order?.TotalPosition</span>
+                <span style="font-weight:600;font-style: italic;">Пар: @order?.TotalPairs</span>
             </div>
-            <div>
-                <label>TotalPosition:</label>
-                <label>@orderList.TotalPosition</label>
+
+            <div class="d-flex flex-column">
+                <span style="font-weight:600;font-style: italic;">Итого: @order?.OrderTotalMoney$</span>
+                <span style="font-weight:600;font-style: italic;">Депозит: @order?.Deposit$</span>
             </div>
-            <div>
-                <label>TotalPairs:</label>
-                <label>@orderList.TotalPairs</label>
-            </div>
-            <div>
-                <label>OrderTotalMoney:</label>
-                <label>@orderList.OrderTotalMoney</label>
-            </div>
-            <div>
-                <label>Deposit:</label>
-                <label>@orderList.Deposit</label>
-            </div>
-            <div>
-                <label>DateCreate:</label>
-                <label>@orderList.DateCreate</label>
-            </div>
-            @if (currentClient != null)
-            {
-                <div>
-                    <label>Client:</label>
-                    <label>@currentClient.FullName</label>
-                </div>
-            }
         </div>
     }
 }
@@ -232,16 +336,32 @@ else
 
 
 
-
 @code {
-    [Parameter]
-    public int clientId { get; set; }
+
     [Parameter]
     public int? orderId { get; set; }
 
-    public Client currentClient { get; set; }
-    OrderList orderList;
-    OrderString orderString = new OrderString();
+    [Parameter]
+    public int testClientid { get; set; }
+
+    Order order;
+    OrderItem orderString = new OrderItem();
+
+    List<Client> allClients;
+    Client selectedClient;
+
+
+
+
+
+    protected void SetAndNavigateToURL()
+    {
+        string loadURL = $"PrintReport/GetResultReqestReportFile?clientId={order.ClientId}&orderId={order.Id}";
+        NavigationManager.NavigateTo(loadURL, true);
+    }
+
+
+
 
 
 
@@ -249,65 +369,136 @@ else
     {
         if (orderId > 0)
         {
-            await GetOrder(orderId);
+            await GetOrderById(orderId);
+            await GetClient(order.ClientId);
         }
         else
         {
-            await CreateAndGetOrder();
+            await CreateOrderObject();
+
+            if (testClientid > 0)
+                await GetClient(testClientid);
+            else
+                await GetAllClient();
         }
-        await GetClient(clientId);
     }
 
-    protected async Task GetClient(int clientId)
+    protected string VisibleChangeClient()
     {
-        currentClient = await Http.GetFromJsonAsync<Client>($"https://localhost:7256/Client/GetClientById?id={clientId}");
+        return (order.Id > 0 && selectedClient != null || order.Id == 0 && testClientid > 0) ? "none" : "flex";
     }
 
-    protected async Task GetOrder(int? orderId)
+
+    protected async void ChangeClientBtn_Click()
     {
-        orderList = await Http.GetFromJsonAsync<OrderList>($"https://localhost:7256/OrderList/GetOrderById?id={orderId}");
+        if (selectedClient != null)
+        {
+            selectedClient = null;
+            testClientid = 0;
+        }
 
-        var allOrderStringsList = await Http.GetFromJsonAsync<List<OrderString>>($"https://localhost:7256/OrderString/GetAllStringsByOrderListId?id={orderId}");
-
-        if (orderList != null)
-            orderList.OrderStrings = allOrderStringsList;
+        await GetAllClient();
     }
+
+
+    private void SelectedClientChanged(Client client)
+    {
+        selectedClient = client;
+
+        StateHasChanged();
+    }
+
 
     protected async Task CreateAndGetOrder()
     {
-        orderList = new OrderList();
-        orderList.ClientId = clientId;
+        if (selectedClient.Id > 0)
+        {
+            order.ClientId = selectedClient.Id;//ppp
 
-        var resp = await Http.PostAsJsonAsync("https://localhost:7256/OrderList/AddOrderList", orderList);
+            var resp = await Http.PostAsJsonAsync("https://localhost:7256/Order/AddOrderList", order);
 
-        if (resp.IsSuccessStatusCode)
-            orderList = await Http.GetFromJsonAsync<OrderList>($"https://localhost:7256/OrderList/GetLastCreatedOrderListByUserId?id={clientId}");
-        orderId = orderList.Id;
-        StateHasChanged();
+            if (resp.IsSuccessStatusCode)
+                order = await Http.GetFromJsonAsync<Order>($"https://localhost:7256/Order/GetLastCreatedOrderListByUserId?id={selectedClient.Id}");
+            orderId = order.Id;
+        }
     }
 
 
     protected async Task AddString()
     {
-        //TODO Добавить Валидацию
-        orderString.OrderListId = orderList.Id;
-        var resp = await Http.PostAsJsonAsync("https://localhost:7256/OrderString/AddOrderString", orderString);
-        if(resp.IsSuccessStatusCode)
+        if (selectedClient is not null)
         {
-            orderList.OrderStrings = await Http.GetFromJsonAsync<List<OrderString>>("https://localhost:7256/OrderString/GetAllStringsByOrderListId?id=" + orderId);
+            if (orderId > 0)
+            {
+                orderString.Kod  = orderString?.Kod?.ToUpper();
+                orderString.Leather = orderString?.Leather?.ToUpper();
+                orderString.Color = orderString?.Color?.ToUpper();
+                orderString.OrderId = order.Id;
+                var resp = await Http.PostAsJsonAsync("https://localhost:7256/OrderItem/AddOrderString", orderString);
+                if (resp.IsSuccessStatusCode)
+                {
+                    order.OrderItems = await Http.GetFromJsonAsync<List<OrderItem>>("https://localhost:7256/OrderItem/GetAllStringsByOrderListId?id=" + orderId);
 
-            ClearFields();
+                    ClearFields();
 
-            StateHasChanged();
+                    StateHasChanged();
+                }
+            }
+            else
+            {
+                await CreateAndGetOrder();
+                await AddString();
+            }
         }
     }
 
-    protected async Task DelString(OrderString orderString)
+
+    protected async Task CreateOrderObject()
     {
-        orderString.OrderListId = orderList.Id;
-        var resp = await Http.DeleteAsync($"https://localhost:7256/OrderString/DeleteOrderString?id={orderString.Id}");
-        if(resp.IsSuccessStatusCode)
-            orderList.OrderStrings.Remove(orderString);
+        order = new Order();
+        order.OrderItems = new();
+    }
+
+
+    private async Task GetAllClient()
+    {
+        allClients = await Http.GetFromJsonAsync<List<Client>>("https://localhost:7256/Client/GetAllClients");
+
+        StateHasChanged();
+    }
+
+
+    private string GetFontColorClass(int size)
+    {
+        return (size == 0) ? "hideLabel" : "blackColor";
+    }
+
+    private string GetFontColorClass(string prop)
+    {
+        return (prop is null) ? "hideLabel" : "blackColor";
+    }
+
+    protected async Task GetClient(int? clientId)
+    {
+        selectedClient = await Http.GetFromJsonAsync<Client>($"https://localhost:7256/Client/GetClientById?id={clientId}");
+    }
+
+    protected async Task GetOrderById(int? orderId)
+    {
+        order = await Http.GetFromJsonAsync<Order>($"https://localhost:7256/Order/GetOrderById?id={orderId}");
+
+        var allOrderStringsList = await Http.GetFromJsonAsync<List<OrderItem>>($"https://localhost:7256/OrderItem/GetAllStringsByOrderListId?id={orderId}");
+
+        if (order != null)
+            order.OrderItems = allOrderStringsList;
+    }
+
+    protected async Task DelString(OrderItem orderString)
+    {
+        orderString.OrderId = order.Id;
+        var resp = await Http.DeleteAsync($"https://localhost:7256/OrderItem/DeleteOrderString?id={orderString.Id}");
+        if (resp.IsSuccessStatusCode)
+            order.OrderItems.Remove(orderString);
 
         StateHasChanged();
     }
@@ -328,70 +519,4 @@ else
         orderString.Size41 = 0;
         orderString.Price = 0;
     }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    //protected async override Task OnInitializedAsync()
-    //{
-    //    await GetOrderList(clientId);
-
-    //    orderString = new OrderString();
-
-    //    await GetAllStringsInOrder(orderList.Id);
-    //}
-
-    //protected async Task AddString()
-    //{
-    //    orderString.OrderListId = orderList.Id;
-
-    //    var resp = await Http.PostAsJsonAsync("https://localhost:7256/OrderString/AddOrderString", orderString);
-    //    await GetAllStringsInOrder(orderList.Id);
-
-
-    //    orderList = await GetOrderList(clientId);
-    //}
-
-
-    //protected async Task<OrderList> GetOrderList(int id)
-    //{
-    //    orderList = await Http.GetFromJsonAsync<OrderList>($"https://localhost:7256/OrderList/GetLastCreatedOrderListByUserId?id={id}");
-    //    return orderList;
-    //}
-
-
-    //List<OrderString> allOrderStringsList;
-    //protected async Task GetAllStringsInOrder(int orderId)
-    //{
-    //    allOrderStringsList = await Http.GetFromJsonAsync<List<OrderString>>("https://localhost:7256/OrderString/GetAllStringsByOrderListId?id=" + orderId);
-
-    //    orderList.OrderStrings = allOrderStringsList;
-    //    orderList.DateModify = DateTime.UtcNow;
-
-    //    await EditOrderList(orderList);
-
-    //    StateHasChanged();
-    //}
-
-    //protected async Task EditOrderList(OrderList orderList)
-    //{
-    //    await Http.PutAsJsonAsync<OrderList>("https://localhost:7256/OrderList/EditOrderList", orderList);
-    //    await GetOrderList(clientId);
-    //}
 }

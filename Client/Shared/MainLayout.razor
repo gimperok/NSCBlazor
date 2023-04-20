@@ -1,19 +1,24 @@
 ﻿@inherits LayoutComponentBase
 
 <div class="page">
-    <div class="sidebar">
+
+    <div class="header">
+        <a href="/" style="align-self: start;margin-left: 20px; margin-right: auto; width: 100%;">
+            <img src="/nsc-logo.png" style="max-height: 100px;" />
+        </a>
+    </div>
+
+    <div class="sidebar" style="margin-top:100px;">
         <NavMenu />
     </div>
 
     <main>
-@*        <div class="top-row px-4">
-            <a href="https://docs.microsoft.com/aspnet/" target="_blank">About</a>
-        </div>*@
-        <div class="test">
-            <img class="test-img" src="/nsc-logo.png">
-        </div>
 
-        <article class="content px-4">
+
+
+        
+
+        <article class="content px-4" style="margin-top:100px;">
             @Body
         </article>
     </main>

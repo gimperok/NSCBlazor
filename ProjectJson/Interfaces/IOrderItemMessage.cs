@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace ProjectJson.Interfaces
 {
-    public interface IOrderStringMessage
+    public interface IOrderItemMessage
     {
         /// <summary>
         /// id заказа
@@ -67,17 +67,17 @@ namespace ProjectJson.Interfaces
         /// <summary>
         /// Всего пар в этой строке
         /// </summary>
-        public int? TotalCountPairs { get; }
+        public int TotalCountPairs { get; }
 
         /// <summary>
         /// Цена одной позиции
         /// </summary>
-        public double? Price { get; set; }
+        public double Price { get; set; }
 
         /// <summary>
         /// Общая цена серии
         /// </summary>
-        public double? TotalPrice { get; }
+        public double TotalPrice { get; }
 
         /// <summary>
         /// Заметка
@@ -87,7 +87,7 @@ namespace ProjectJson.Interfaces
         /// <summary>
         /// внешний ключ для OrderList
         /// </summary>
-        public int? OrderListId { get; set; }
+        public int? OrderId { get; set; }
         //public OrderListMessage? OrderList { get; set; }
     }
 }
