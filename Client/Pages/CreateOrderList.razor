@@ -52,6 +52,9 @@
     .del-red:hover {
         color: indianred;
     }
+    .print-btn:hover {
+        color:blue;
+    }
 
     .dxbs-grid>.card>.card-body, .dxbs-grid>.card>.card-header, .dxbs-grid>.card>.card-footer {
         background-color: peachpuff;
@@ -115,23 +118,26 @@
 }
 else
 {
-    <div class="d-flex justify-content-between">
-        <div class="d-flex flex-row">
-            <label class="@GetFontColorClass(selectedClient?.FullName)" style="font-weight: 600;">@selectedClient?.FullName</label>
-            <span style="display:@VisibleChangeClient()">
-                <DxButton RenderStyle="ButtonRenderStyle.None"
-                                  title="Сменить клиента"
-                                  CssClass="fa fa-times-circle"
-                                  Click="ChangeClientBtn_Click" />
-            </span>
+    if(order?.Id >= 0)
+    {
+        <div class="d-flex justify-content-between">
+            <div class="d-flex flex-row">
+                <label class="@GetFontColorClass(selectedClient?.FullName)" style="font-weight: 600;">@selectedClient?.FullName</label>
+                <span style="display:@VisibleChangeClient()">
+                    <DxButton RenderStyle="ButtonRenderStyle.None"
+                                      title="Сменить клиента"
+                                      CssClass="fa fa-times-circle"
+                                      Click="ChangeClientBtn_Click" />
+                </span>
+            </div>
+            <div>
+                <label class="@GetFontColorClass(order.Id)" style="font-weight: 600;">Заказ № @order?.Id</label>
+            </div>
+            <div>
+                <label style="font-weight: 600;" >@order?.DateCreate?.ToString("dd.MM.yyyy")</label>
+            </div>
         </div>
-        <div>
-            <label class="@GetFontColorClass(order.Id)" style="font-weight: 600;">Заказ № @order?.Id</label>
-        </div>
-        <div>
-            <label style="font-weight: 600;" >@order?.DateCreate?.ToString("dd.MM.yyyy")</label>
-        </div>
-    </div>
+    }
 }
 
 
@@ -139,7 +145,7 @@ else
 @if (order != null && orderString != null)
 {
   
-
+    #region EnterString
     <table style="width:100%; margin-top:10px;">
         <tr>
             <th><span class="text-center">Код</span></th>
@@ -213,7 +219,7 @@ else
             </td>
         </tr>
     </table>
-
+    #endregion
 
     <div @onclick="(()=>AddString())" class="order-item" >
         <i class="fa fa-plus" style="margin-right:5px;" />
@@ -301,7 +307,7 @@ else
                     <HeaderTemplate>
                         <DxButton RenderStyle="ButtonRenderStyle.None"
                           title="Отправить на печать"
-                          CssClass="fa fa-print" 
+                          CssClass="fa fa-print print-btn"
                           Click="SetAndNavigateToURL" />
                     </HeaderTemplate>
                     <CellDisplayTemplate>
@@ -385,7 +391,7 @@ else
 
     protected string VisibleChangeClient()
     {
-        return (order.Id > 0 && selectedClient != null || order.Id == 0 && testClientid > 0) ? "none" : "flex";
+        return (order?.Id > 0 && selectedClient != null || order?.Id == 0 && testClientid > 0) ? "none" : "flex";
     }
 
 

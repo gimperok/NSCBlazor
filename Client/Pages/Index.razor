@@ -10,14 +10,6 @@
 
 
 <style>
-    .w-30 {
-        width: 30%;
-    }
-
-    .ml-27 {
-        margin-left: 27%;
-    }
-
     .page-link {
         background: peachpuff;
         border-color: black;
@@ -35,24 +27,13 @@
         color: black;
         background-color: oldlace;
     }
+    .add-btn:hover {
+        color: gray;
+    }
 
-    .del-red:hover {
+    .del-btn:hover {
         color: indianred;
-    }
-
-    .order-item{
-        display: flex;
-        background-color: rgba(250,240,230,0.75);
-        border: 2px solid whitesmoke;
-        border-radius: 12px;
-        color: black;
-        margin: 10px 10px 30px 10px;
-        padding: 10px;
-    }
-    .order-item:hover {
-        background-color: rgba(250,240,230,1.0);
-        border: 2px solid black;
-    }
+    }   
 </style>
 
 <PageTitle>Nursace Order App</PageTitle>
@@ -61,7 +42,7 @@
 
 @if (allOrdersFromDb is null)
 {
-    <div class="loader" style="--b: 20px;--c: #000;width: 80px;--n: 15;--g: 7deg; margin-left: 40%;margin-top: 25%;"></div>
+    <LoadingWheel />
 }
 else if (allOrdersFromDb.Count == 0)
 {
@@ -72,7 +53,7 @@ else
     <div class="d-flex justify-content-center">
         <DxButton RenderStyle="ButtonRenderStyle.None"
                   title="Добавить заказ"
-                  CssClass="fa fa-plus-circle fa-2x"
+                  CssClass="fa fa-plus-circle fa-2x add-btn"
                   Click="@(() => NavigationManager.NavigateTo("/order"))" />
     </div>
 
@@ -96,7 +77,7 @@ else
                     <div class="d-flex justify-content-center ">
                         <DxButton RenderStyle="ButtonRenderStyle.None"
                                   title="Удалить заказ"
-                                  CssClass="fa fa-trash del-red"
+                                  CssClass="fa fa-trash del-btn"
                                   Click="@(() => DeleteOrder(order.Id))" />
                     </div>
                 </div>
@@ -130,12 +111,71 @@ else
     List<Client> allClients { get; set; }
     List<Order>? allOrdersFromDb { get; set; }
 
+    //private async Task GetAllOrderStringsInOrder()
+    //{
+    //    foreach (Order ordList in allOrdersFromDb)
+    //    {
+    //        ordList.OrderItems = await Http.GetFromJsonAsync<List<OrderItem>>($"https://localhost:7256/OrderItem/GetAllStringsByOrderListId?id={ordList.Id}");
+    //    }
+    //}
 
-    protected int PageCounter()
+    //private async Task GetAllOrders(int clientId)
+    //{
+    //    allOrdersFromDb = await Http.GetFromJsonAsync<List<Order>>("https://localhost:7256/Order/GetAllOrderListsByUserId?clientId=" + clientId);
+    //    await GetAllOrderStringsInOrder();
+    //    StateHasChanged();
+    //}
+    //private async Task GetAllOrdersFromDB()
+    //{
+    //    await GetAllOrdersFromDB();
+    //}
+
+    protected override async Task OnInitializedAsync()
     {
-        if (allOrdersFromDb?.Count() % countOrderInPage == 0)
-            return allOrdersFromDb.Count() / countOrderInPage;
-        return allOrdersFromDb.Count() / countOrderInPage + 1;
+        await GetAllOrdersFromDB();
+        ShowOrderInPage();
+    }
+
+    private async Task GetAllClient()
+    {
+        allClients = await Http.GetFromJsonAsync<List<Client>>("https://localhost:7256/Client/GetAllClients");
+        //var resp = await Http.SendAsync(new HttpRequestMessage(HttpMethod.Get, "https:localhost:7256/Client/GetClientById?id=1"));
+
+        selectedClient = allClients?.FirstOrDefault();
+
+        StateHasChanged();
+    }
+
+    private async Task GetAllOrdersFromDB() //пока не используется
+    {
+        allOrdersFromDb = await Http.GetFromJsonAsync<List<Order>>("https://localhost:7256/Order/GetAllOrdersFromDb");
+
+        foreach (var order in allOrdersFromDb)
+        {
+            order.OrderItems = await Http.GetFromJsonAsync<List<OrderItem>>($"https://localhost:7256/OrderItem/GetAllStringsByOrderListId?id={order.Id}");
+        }
+        StateHasChanged();
+    }
+
+    private async Task CreateOrder(Client client)
+    {
+        NavigationManager.NavigateTo($"/Order/{client.Id}");
+    }
+
+    private void SelectedClientChanged(Client client)
+    {
+        selectedClient = client;
+        allOrdersFromDb = null;
+        StateHasChanged();
+    }
+
+    private async Task DeleteOrder(int id)
+    {
+        var response = await Http.DeleteAsync($"https://localhost:7256/OrderItem/DeleteAllStringsForOrder?id={id}");
+        if (response.IsSuccessStatusCode)
+            await Http.DeleteAsync($"https://localhost:7256/Order/DeleteOrderList?id={id}");
+
+        GetAllOrdersFromDB();
     }
 
     private List<Order> OrdersForShow;
@@ -157,73 +197,10 @@ else
         return OrdersForShow;
     }
 
-    protected override async Task OnInitializedAsync()
+    protected int PageCounter()
     {
-        await GetAllOrdersFromDB();
-        ShowOrderInPage();
-    }
-
-    private async Task GetAllClient()
-    {
-        allClients = await Http.GetFromJsonAsync<List<Client>>("https://localhost:7256/Client/GetAllClients");
-        //var resp = await Http.SendAsync(new HttpRequestMessage(HttpMethod.Get, "https:localhost:7256/Client/GetClientById?id=1"));
-
-        selectedClient = allClients?.FirstOrDefault();
-
-        StateHasChanged();
-    }
-
-    private async Task GetAllOrders(int clientId)
-    {
-        allOrdersFromDb = await Http.GetFromJsonAsync<List<Order>>("https://localhost:7256/Order/GetAllOrderListsByUserId?clientId=" + clientId);
-        await GetAllOrderStringsInOrder();
-        StateHasChanged();
-    }
-
-    private async Task GetAllOrdersFromDB() //пока не используется
-    {
-        allOrdersFromDb = await Http.GetFromJsonAsync<List<Order>>("https://localhost:7256/Order/GetAllOrdersFromDb");
-
-        foreach (var order in allOrdersFromDb)
-        {
-            order.OrderItems = await Http.GetFromJsonAsync<List<OrderItem>>($"https://localhost:7256/OrderItem/GetAllStringsByOrderListId?id={order.Id}");
-        }
-        StateHasChanged();
-    }
-
-
-    private async Task GetAllOrderStringsInOrder()
-    {
-        foreach (Order ordList in allOrdersFromDb)
-        {
-            ordList.OrderItems = await Http.GetFromJsonAsync<List<OrderItem>>($"https://localhost:7256/OrderItem/GetAllStringsByOrderListId?id={ordList.Id}");
-        }
-    }
-
-
-    private async Task GetAllOrders_Click()
-    {
-        await GetAllOrdersFromDB();
-    }
-
-    private async Task CreateOrder(Client client)
-    {
-        NavigationManager.NavigateTo($"/Order/{client.Id}");
-    }
-
-    private void SelectedClientChanged(Client client)
-    {
-        selectedClient = client;
-        allOrdersFromDb = null;
-        StateHasChanged();
-    }
-
-    private async Task DeleteOrder(int id)
-    {
-        var response = await Http.DeleteAsync($"https://localhost:7256/OrderItem/DeleteAllStringsForOrder?id={id}");
-        if (response.IsSuccessStatusCode)
-            await Http.DeleteAsync($"https://localhost:7256/Order/DeleteOrderList?id={id}");
-
-        GetAllOrders_Click();
+        if (allOrdersFromDb?.Count() % countOrderInPage == 0)
+            return allOrdersFromDb.Count() / countOrderInPage;
+        return allOrdersFromDb.Count() / countOrderInPage + 1;
     }
 }

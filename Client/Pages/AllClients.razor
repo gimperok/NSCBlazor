@@ -10,7 +10,6 @@
 <style>
     .order-item {
         display: flex;
-        /*background: linen;*/
         background-color: rgba(250,240,230,0.75);
         border: 2px solid whitesmoke;
         border-radius: 12px;
@@ -25,6 +24,7 @@
     }
     .delClient-btn{
         float:right;
+        margin-right: 5px;
     }
 
     .delClient-btn:hover {
@@ -38,9 +38,6 @@
     .textBox-search{
         width:100%;
         margin: 10px 5px;
-/*        margin-right: 5px;
-        margin-top: 10px;
-        margin-bottom: 10px;*/
     }
     .search-btn{
         margin-top: 10px;
@@ -67,9 +64,10 @@
 
 @if (@clientsForShow == null)
 {
+    <LoadingWheel />
     <div>
         <span class="forSpan-center">Загрузка клиентов...</span>
-    </div>
+    </div>    
 }
 else if (clientsForShow.Count == 0)
 {
@@ -81,12 +79,12 @@ else
     {
         <div class="order-item mt-3" style="flex-direction: column; max-width: 450px; min-width:300px;">
             <div style="flex-direction:row">
-                <label style="font-weight: 600;">@client.Name @client.Surname @client.City</label>
-                <DxButton RenderStyle="ButtonRenderStyle.None"
-                  title="Редактировать клиента"
-                  CssClass="fa fa-pencil otherSmall-btn"
-                  Click="@(() => EditClient(client.Id))" />
+                <i class="fa fa-user" style="padding: 0px 0px 3px 5px;" />
 
+                <span class="otherSmall-btn"
+                      style="font-weight: 600; cursor:pointer; margin-left: 3px;"
+                      title="Редактировать клиента" 
+                      onclick="@(() => EditClient(client.Id))">@client.Name @client.Surname @client.City</span>
 
                 <DxButton RenderStyle="ButtonRenderStyle.None"
                   title="Удалить клиента"
@@ -94,16 +92,21 @@ else
                   Click="@(() => DeleteClient(client.Id))" />
             </div>
 
-            <span style="font-style: italic;">@client.Tel</span>
-            <hr/>
-            <label>@client.Country: @client.Cargo</label>
-            <div style="flex-direction:row">
-                <DxButton RenderStyle="ButtonRenderStyle.None"
-                  title="Создать заказ"
-                  CssClass="fa fa-file-text otherSmall-btn"
-                  Click="@(() => NavigToCreateOrderForThisClient(client))" />
-            </div>
+            <span style="font-style: italic; margin-left: 19px;">@client.Tel</span>
 
+            <hr style="margin: 10px 10px;" />
+
+            <div class="d-flex flex-row">
+                <div style="margin-left: 10px;">
+                    <span>@client.Country: @client.Cargo</span>
+                </div>
+                <button class="fa fa-file-text otherSmall-btn"
+                        style=" border: none;
+                                background: transparent;
+                                margin-left: auto;
+                                margin-right: 5px;"
+                        onclick="@(() => NavigToCreateOrderForThisClient(client))">Создать заказ</button>                
+            </div>
         </div>
     }
 }
