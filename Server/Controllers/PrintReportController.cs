@@ -18,7 +18,12 @@ namespace NSCBlazor.Server.Controllers
         }
 
 
-
+        /// <summary>
+        /// Экспорт отчет в Pdf файл
+        /// </summary>
+        /// <param name="clientId">Идентификатор клиента</param>
+        /// <param name="orderId">Идентификатор заказа</param>
+        /// <returns>Pdf файл</returns>
         [HttpGet("[action]")]
         public async Task<FileResult> GetResultReqestReportFile(int clientId, int orderId)
         {
