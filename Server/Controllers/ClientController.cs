@@ -1,7 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-
 using ProjectJson.Models;
-
 
 
 namespace NSCBlazor.Server.Controllers
@@ -43,7 +41,6 @@ namespace NSCBlazor.Server.Controllers
         /// Добавить клиента
         /// </summary>
         /// <param name="client">Обьект клиента</param>
-        /// <returns></returns>
         [HttpPost]
         public async Task<bool> AddClient(ClientMessage client)
         {
@@ -57,7 +54,6 @@ namespace NSCBlazor.Server.Controllers
         /// Изменить обьект клиента
         /// </summary>
         /// <param name="editClient">Обьект клиента</param>
-        /// <returns></returns>
         [HttpPut]
         public async Task<bool> EditClient(ClientMessage editClient)
         {
@@ -72,7 +68,6 @@ namespace NSCBlazor.Server.Controllers
         /// Удалить клиента по его ID
         /// </summary>
         /// <param name="id">Идентификатор клиента</param>
-        /// <returns></returns>
         [HttpDelete]
         public async Task<bool> DeleteClient(int id)
         {

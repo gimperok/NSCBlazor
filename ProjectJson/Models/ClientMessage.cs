@@ -56,7 +56,5 @@ namespace ProjectJson.Models
         ///// список заказов
         ///// </summary>
         //public List<OrderMessage>? Orders { get; set; }
-
-
     }
 }

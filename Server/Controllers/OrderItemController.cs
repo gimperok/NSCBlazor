@@ -13,6 +13,11 @@ namespace NSCBlazor.Server.Controllers
             httpClient = _httpClient;
         }
 
+        /// <summary>
+        /// Получить все строки заказа по ID заказа
+        /// </summary>
+        /// <param name="id">Идентификатор заказа</param>
+        /// <returns>Список строк указанного заказа</returns>
         [HttpGet]
         public async Task<List<OrderItemMessage>> GetAllStringsByOrderListId(int id)
         {
@@ -20,7 +25,10 @@ namespace NSCBlazor.Server.Controllers
             return orderStrings;
         }
 
-
+        /// <summary>
+        /// Добавить строку в заказ
+        /// </summary>
+        /// <param name="orderString">Обьект строки</param>
         [HttpPost]
         public async Task<bool> AddOrderString(OrderItemMessage orderString)
         {
@@ -30,7 +38,10 @@ namespace NSCBlazor.Server.Controllers
             return false;
         }
 
-
+        /// <summary>
+        /// Изменить обьект строки
+        /// </summary>
+        /// <param name="orderString">Обьект строки</param>
         [HttpPut]
         public async Task<bool> EditOrderString(OrderItemMessage orderString)
         {
@@ -40,7 +51,10 @@ namespace NSCBlazor.Server.Controllers
             return false;
         }
 
-
+        /// <summary>
+        /// Удалить обьект строки по ее ID
+        /// </summary>
+        /// <param name="id">Идентификатор строки</param>
         [HttpDelete]
         public async Task<bool> DeleteOrderString(int id)
         {
@@ -50,7 +64,10 @@ namespace NSCBlazor.Server.Controllers
             return false;
         }
 
-
+        /// <summary>
+        /// Удалить все строки по ID заказа
+        /// </summary>
+        /// <param name="id">Идентификатор заказа</param>
         [HttpDelete]
         public async Task<bool> DeleteAllStringsForOrder(int id)
         {
@@ -58,7 +75,6 @@ namespace NSCBlazor.Server.Controllers
             if (response.IsSuccessStatusCode)
                 return true;
             return false;
-        }
-        
+        }        
     }
 }

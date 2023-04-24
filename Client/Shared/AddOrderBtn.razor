@@ -1,0 +1,18 @@
+﻿@inject NavigationManager NavigationManager
+
+<style>
+    .add-btn:hover {
+        color: gray;
+    }
+</style>
+
+<div class="d-flex justify-content-center">
+    <DxButton RenderStyle="ButtonRenderStyle.None"
+              title="Добавить заказ"
+              CssClass="fa fa-plus-circle fa-2x add-btn"
+              Click="@(() => NavigationManager.NavigateTo("/order"))" />
+</div>
+
+@code {
+
+}

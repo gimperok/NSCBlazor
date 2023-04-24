@@ -1,4 +1,5 @@
 ﻿@page "/clients"
+@using NSCBlazor.Client.Helpers
 @using NSCBlazor.Shared
 @using NSCBlazor.Shared.Models
 @inject HttpClient Http
@@ -129,7 +130,8 @@ else
 
     private async Task GetAllClient()
     {
-        allClients = await Http.GetFromJsonAsync<List<Client>>("https://localhost:7256/Client/GetAllClients");
+        allClients = await RouteHelper.GetAllClients(Http);
+
         StateHasChanged();
     }
 
@@ -140,7 +142,7 @@ else
 
     private async Task DeleteClient(int id)
     {
-        var resp = await Http.DeleteAsync("https://localhost:7256/Client/DeleteClient?id="+ id);
+        await RouteHelper.DeleteClient(Http, id);
 
         await GetAllClient();
         clientsForShow = allClients;

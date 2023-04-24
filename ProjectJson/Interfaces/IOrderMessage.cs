@@ -15,25 +15,6 @@ namespace ProjectJson.Interfaces
         /// </summary>
         public int Id { get; set; }
 
-        ///// <summary>
-        ///// Всего позиций в заказе
-        ///// </summary>
-        //public int TotalPosition { get;}
-
-        ///// <summary>
-        ///// Всего пар в заказе
-        ///// </summary>
-        //public int TotalPairs { get;}
-
-        ///// <summary>
-        ///// Общая сумма заказа
-        ///// </summary>
-        //public double OrderTotalMoney { get;}
-
-        ///// <summary>
-        ///// Депозит за данный заказ
-        ///// </summary>
-        //public double Deposit{ get;}
 
         /// <summary>
         /// Дата создания заказа
@@ -45,10 +26,10 @@ namespace ProjectJson.Interfaces
         /// </summary>
         public DateTime? DateModify { get; set; }
 
+
         /// <summary>
         /// внешний ключ Client
         /// </summary>
         public int? ClientId { get; set; }
-        //public ClientMessage? Client { get; set; }
     }
 }

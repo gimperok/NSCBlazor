@@ -5,8 +5,6 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace ProjectAPI.Models
 {
-    public class OrderItemDb : OrderItemMessage
-    {
+    public class OrderItemDb : OrderItemMessage { }
 
-    }
 }

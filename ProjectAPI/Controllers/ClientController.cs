@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using ProjectAPI.DBContext;
 using ProjectJson.Models;
 using System.Text.Json;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
 
 namespace ProjectAPI.Controllers
 {
@@ -17,18 +18,46 @@ namespace ProjectAPI.Controllers
             db = _db;
         }
 
-
-        [HttpGet]
-        public List<ClientMessage> GetAllClients() => db.Clients.ToList();
-
+        /// <summary>
+        /// Получить клиента по его ID
+        /// </summary>
+        /// <param name="id">Идентификатор клиента</param>
+        /// <returns>Обьект клиента</returns>
         [HttpGet]
         public ClientMessage GetClientById(int id)
-        {            
+        {
             var client = db.Clients.FirstOrDefault(p => p.Id == id);
             return client;
         }
 
+        /// <summary>
+        /// Получить список всех клиентов
+        /// </summary>
+        /// <returns>Список всех клиентов</returns>
+        [HttpGet]
+        public List<ClientMessage> GetAllClients() => db.Clients.ToList();
+        //{
+        //    try
+        //    {
+        //        if (db.Clients?.Count() > 0)
+        //            return db.Clients.ToList();
+        //    }
+        //    catch (Exception e) { }
+        //    finally
+        //    {
+        //        Connection.State
+        //        //db.
+        //    }
 
+
+
+
+        //}
+
+        /// <summary>
+        /// Добавить клиента
+        /// </summary>
+        /// <param name="client">Обьект клиента</param>
         [HttpPost]
         public bool AddClient(ClientMessage client)
         {
@@ -40,7 +69,10 @@ namespace ProjectAPI.Controllers
             return true;
         }
 
-
+        /// <summary>
+        /// Изменить обьект клиента
+        /// </summary>
+        /// <param name="editClient">Обьект клиента</param>
         [HttpPut]
         public bool EditClient(ClientMessage client)
         {
@@ -64,7 +96,10 @@ namespace ProjectAPI.Controllers
             return true;
         }
 
-
+        /// <summary>
+        /// Удалить клиента по его ID
+        /// </summary>
+        /// <param name="id">Идентификатор клиента</param>
         [HttpDelete]
         public bool DeleteClientById(int id)
         {

@@ -5,8 +5,6 @@ using System.ComponentModel.DataAnnotations;
 
 namespace ProjectAPI.Models
 {
-    public class ClientDb : ClientMessage
-    {
+    public class ClientDb : ClientMessage { }
 
-    }
 }

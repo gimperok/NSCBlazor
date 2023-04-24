@@ -18,7 +18,11 @@ namespace ProjectAPI.Controllers
             db = _db;
         }
 
-
+        /// <summary>
+        /// Получить все строки заказа по ID заказа
+        /// </summary>
+        /// <param name="id">Идентификатор заказа</param>
+        /// <returns>Список строк указанного заказа</returns>
         [HttpGet]
         public List<OrderItemMessage> GetAllStringsByOrderListId(int orderId)
         {
@@ -28,7 +32,10 @@ namespace ProjectAPI.Controllers
             return orderStringsList;
         }
 
-
+        /// <summary>
+        /// Добавить строку в заказ
+        /// </summary>
+        /// <param name="orderString">Обьект строки</param>
         [HttpPost]
         public bool AddOrderString(OrderItemMessage orderString)
         {
@@ -36,10 +43,20 @@ namespace ProjectAPI.Controllers
                 return false;
 
             db.OrderItems.Add(orderString);
+
+            var order = db.Orders.Where(x => x.Id == orderString.OrderId).FirstOrDefault();
+            order.DateModify = DateTime.Now;
+
+            db.Orders.Update(order);
+
             db.SaveChanges();
             return true;
         }
 
+        /// <summary>
+        /// Изменить обьект строки
+        /// </summary>
+        /// <param name="orderString">Обьект строки</param>
         [HttpPut]
         public bool EditOrderString(OrderItemMessage editedOrderString)
         {
@@ -68,11 +85,20 @@ namespace ProjectAPI.Controllers
 
 
             db.OrderItems.Update(currentOrderString);
+
+            var order = db.Orders.Where(x => x.Id == currentOrderString.OrderId).FirstOrDefault();
+            order.DateModify = DateTime.Now;
+
+            db.Orders.Update(order);
+
             db.SaveChanges();
             return true;
         }
 
-
+        /// <summary>
+        /// Удалить обьект строки по ее ID
+        /// </summary>
+        /// <param name="id">Идентификатор строки</param>
         [HttpDelete]
         public bool DeleteOrderStringById(int id)
         {
@@ -81,10 +107,20 @@ namespace ProjectAPI.Controllers
                 return false;
 
             db.OrderItems.Remove(orderString);
+
+            var order = db.Orders.Where(x => x.Id == orderString.OrderId).FirstOrDefault();
+            order.DateModify = DateTime.Now;
+
+            db.Orders.Update(order);
+
             db.SaveChanges();
             return true;
         }
 
+        /// <summary>
+        /// Удалить все строки по ID заказа
+        /// </summary>
+        /// <param name="id">Идентификатор заказа</param>
         [HttpDelete]
         public bool DeleteAllStringsForOrder(int id)
         {

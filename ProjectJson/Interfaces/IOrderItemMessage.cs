@@ -88,6 +88,5 @@ namespace ProjectJson.Interfaces
         /// внешний ключ для OrderList
         /// </summary>
         public int? OrderId { get; set; }
-        //public OrderListMessage? OrderList { get; set; }
     }
 }

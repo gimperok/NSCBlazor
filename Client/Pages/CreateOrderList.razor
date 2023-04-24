@@ -2,6 +2,7 @@
 @page "/OrderForClient/{testClientid:int}/{orderId:int?}"
 
 
+@using NSCBlazor.Client.Helpers
 @using NSCBlazor.Shared.Models;
 @using ProjectJson.Models
 
@@ -357,25 +358,11 @@ else
     Client selectedClient;
 
 
-
-
-
-    protected void SetAndNavigateToURL()
-    {
-        string loadURL = $"PrintReport/GetResultReqestReportFile?clientId={order.ClientId}&orderId={order.Id}";
-        NavigationManager.NavigateTo(loadURL, true);
-    }
-
-
-
-
-
-
     protected async override Task OnInitializedAsync()
     {
         if (orderId > 0)
         {
-            await GetOrderById(orderId);
+            await GetOrderById((int)orderId);
             await GetClient(order.ClientId);
         }
         else
@@ -419,12 +406,12 @@ else
     {
         if (selectedClient.Id > 0)
         {
-            order.ClientId = selectedClient.Id;//ppp
+            order.ClientId = selectedClient.Id;
 
-            var resp = await Http.PostAsJsonAsync("https://localhost:7256/Order/AddOrderList", order);
+            var resp = await RouteHelper.AddOrder(Http, order);
 
             if (resp.IsSuccessStatusCode)
-                order = await Http.GetFromJsonAsync<Order>($"https://localhost:7256/Order/GetLastCreatedOrderListByUserId?id={selectedClient.Id}");
+                order = await RouteHelper.GetLastCreatedOrderListByClientId(Http, selectedClient.Id);
             orderId = order.Id;
         }
     }
@@ -440,10 +427,10 @@ else
                 orderString.Leather = orderString?.Leather?.ToUpper();
                 orderString.Color = orderString?.Color?.ToUpper();
                 orderString.OrderId = order.Id;
-                var resp = await Http.PostAsJsonAsync("https://localhost:7256/OrderItem/AddOrderString", orderString);
+                var resp = await RouteHelper.AddOrderString(Http, orderString);
                 if (resp.IsSuccessStatusCode)
                 {
-                    order.OrderItems = await Http.GetFromJsonAsync<List<OrderItem>>("https://localhost:7256/OrderItem/GetAllStringsByOrderListId?id=" + orderId);
+                    order.OrderItems = await RouteHelper.GetAllStringsByOrderListId(Http, order.Id);
 
                     ClearFields();
 
@@ -468,7 +455,7 @@ else
 
     private async Task GetAllClient()
     {
-        allClients = await Http.GetFromJsonAsync<List<Client>>("https://localhost:7256/Client/GetAllClients");
+        allClients = await RouteHelper.GetAllClients(Http);
 
         StateHasChanged();
     }
@@ -484,16 +471,23 @@ else
         return (prop is null) ? "hideLabel" : "blackColor";
     }
 
-    protected async Task GetClient(int? clientId)
+    protected void SetAndNavigateToURL()
     {
-        selectedClient = await Http.GetFromJsonAsync<Client>($"https://localhost:7256/Client/GetClientById?id={clientId}");
+        string loadURL = $"PrintReport/GetResultReqestReportFile?clientId={order.ClientId}&orderId={order.Id}";
+        NavigationManager.NavigateTo(loadURL, true);
     }
 
-    protected async Task GetOrderById(int? orderId)
+    protected async Task GetClient(int? clientId)
     {
-        order = await Http.GetFromJsonAsync<Order>($"https://localhost:7256/Order/GetOrderById?id={orderId}");
+        if (clientId > 0)
+            selectedClient = await RouteHelper.GetClientById(Http, (int)clientId);
+    }
 
-        var allOrderStringsList = await Http.GetFromJsonAsync<List<OrderItem>>($"https://localhost:7256/OrderItem/GetAllStringsByOrderListId?id={orderId}");
+    protected async Task GetOrderById(int orderId)
+    {
+        order = await RouteHelper.GetOrderById(Http, orderId);
+
+        var allOrderStringsList = await RouteHelper.GetAllStringsByOrderListId(Http, orderId);
 
         if (order != null)
             order.OrderItems = allOrderStringsList;
@@ -502,7 +496,8 @@ else
     protected async Task DelString(OrderItem orderString)
     {
         orderString.OrderId = order.Id;
-        var resp = await Http.DeleteAsync($"https://localhost:7256/OrderItem/DeleteOrderString?id={orderString.Id}");
+        var resp = await RouteHelper.DeleteOrderString(Http, orderString);
+
         if (resp.IsSuccessStatusCode)
             order.OrderItems.Remove(orderString);
 

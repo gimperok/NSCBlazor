@@ -4,6 +4,9 @@ using ProjectJson.Models;
 
 namespace NSCBlazor.Shared.Models
 {
+    /// <summary>
+    /// Класс описывающий обьект заказа
+    /// </summary>
     public class Order : OrderMessage
     {
 
@@ -29,6 +32,5 @@ namespace NSCBlazor.Shared.Models
 
 
         public List<OrderItem>? OrderItems { get; set; } /*= new();*/
-
     }
 }

@@ -3,6 +3,7 @@ using NSCBlazor.Shared.Models;
 using ProjectJson.Models;
 using System.Text.Json;
 
+
 namespace NSCBlazor.Server.Controllers
 {
     [ApiController]
@@ -40,6 +41,7 @@ namespace NSCBlazor.Server.Controllers
             return orderList;
         }
 
+
         /// <summary>
         /// Список заказов по ID клиента
         /// </summary>
@@ -55,7 +57,11 @@ namespace NSCBlazor.Server.Controllers
         }
 
 
-        [HttpGet] //СПИСОК ВСЕ ЗАКАЗЫ из БД
+        /// <summary>
+        /// Получить весь список заказов из БД
+        /// </summary>
+        /// <returns>Весь список заказов из БД</returns>
+        [HttpGet]
         public async Task<List<OrderMessage>> GetAllOrdersFromDb()
         {
             List<OrderMessage> orderList = new List<OrderMessage>();
@@ -66,18 +72,25 @@ namespace NSCBlazor.Server.Controllers
         }
 
 
+        /// <summary>
+        /// Добавить заказ
+        /// </summary>
+        /// <param name="orderList">Обьект заказа</param>
         [HttpPost]
         public async Task<bool> AddOrderList(OrderMessage orderList)
         {
             var response = await httpClient.PostAsJsonAsync($"{AppSettings.GetApiUrl}{AppSettings.AddOrderList}", orderList);
+
             if (response.IsSuccessStatusCode)
                 return true;
             return false;
         }
 
 
-
-
+        /// <summary>
+        /// Изменить обьект заказа
+        /// </summary>
+        /// <param name="orderList">Обьект заказа</param>
         [HttpPut]
         public async Task<bool> EditOrderList(OrderMessage orderList)
         {
@@ -89,7 +102,10 @@ namespace NSCBlazor.Server.Controllers
         }
 
 
-
+        /// <summary>
+        /// Удалить заказ
+        /// </summary>
+        /// <param name="id">Идентификатор заказа</param>
         [HttpDelete]
         public async Task<bool> DeleteOrderList(int id)
         {

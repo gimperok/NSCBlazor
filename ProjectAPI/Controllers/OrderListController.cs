@@ -79,8 +79,6 @@ namespace ProjectAPI.Controllers
             foreach (var order in allOrders)
             {
                 order.Client = db.Clients.Where(p => p.Id == order.ClientId).FirstOrDefault();
-                //if (db.OrderItems.Any(item => item.OrderId == ord.Id))
-                //order.OrderItems = db.OrderItems.Where(item => item.OrderId == order.Id).ToList();
             }
 
             return allOrders;
@@ -119,9 +117,6 @@ namespace ProjectAPI.Controllers
 
             if (editOrderList == null)
                 return false;
-
-            editOrderList.DateModify = orderList.DateModify;
-            //editOrderList.OrderItems = orderList.OrderItems;
 
             db.Orders.Update(editOrderList);
             db.SaveChanges();

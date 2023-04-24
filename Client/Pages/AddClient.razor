@@ -1,5 +1,6 @@
 ﻿@page "/Client/{clientId:int?}"
 
+@using NSCBlazor.Client.Helpers
 @using NSCBlazor.Shared
 @using NSCBlazor.Shared.Models
 @using System.ComponentModel.DataAnnotations
@@ -129,8 +130,8 @@
                 <div class="row" style="width: 70%;">
                     <div class="col" @onclick=@(() => NavigationManager.NavigateTo($"OrderForClient/{clientId}/{order?.Id}"))><span style="margin-left: 30px; cursor:pointer;">@order?.Id</span></div>
                     <div class="col" @onclick=@(() => NavigationManager.NavigateTo($"OrderForClient/{clientId}/{order?.Id}"))><span style="margin-left: 30px; cursor:pointer;">@order?.DateCreate?.ToShortDateString()</span></div>
-                    <div class="col" @onclick=@(() => NavigationManager.NavigateTo($"OrderForClient/{clientId}/{order?.Id}"))><span style="margin-left: 30px; cursor:pointer;">@((order?.TotalPairs == 0) ? "-" : $"{order?.TotalPairs}")</span></div>
-                    <div class="col" @onclick=@(() => NavigationManager.NavigateTo($"OrderForClient/{clientId}/{order?.Id}"))><span style="margin-left: 30px; cursor:pointer;">@((order?.OrderTotalMoney == 0) ? "-" : $"{order?.OrderTotalMoney}$")</span></div>
+                    <div class="col" @onclick=@(() => NavigationManager.NavigateTo($"OrderForClient/{clientId}/{order?.Id}"))><span style="margin-left: 30px; cursor:pointer;">@((order?.TotalPairs == 0) ? "-" : $"{order.TotalPairs}")</span></div>
+                    <div class="col" @onclick=@(() => NavigationManager.NavigateTo($"OrderForClient/{clientId}/{order?.Id}"))><span style="margin-left: 30px; cursor:pointer;">@((order?.OrderTotalMoney == 0) ? "-" : $"{order.OrderTotalMoney}$")</span></div>
                     <div class="col">
                         <span style="margin-left: 30px;">
                             <DxButton RenderStyle="ButtonRenderStyle.None"
@@ -181,13 +182,13 @@
         HttpResponseMessage? response;
         if (clientId < 1)
         {
-            response = await Http.PostAsJsonAsync("https://localhost:7256/Client/AddClient", client);
+            response = await RouteHelper.AddClient(Http, client);
             if (response.IsSuccessStatusCode)
                 NavigationManager.NavigateTo("");
         }
         else
         {
-            response = await Http.PutAsJsonAsync("https://localhost:7256/Client/EditClient", client);
+            response = await RouteHelper.EditClient(Http, client);
             if (response.IsSuccessStatusCode)
             {
                 notifMessage = "Данные пользователя успешно обновлены!";
@@ -201,7 +202,7 @@
 
     private async Task GetAllOrders(int clientId)
     {
-        ordersForThisClients = await Http.GetFromJsonAsync<List<Order>>("https://localhost:7256/Order/GetAllOrderListsByUserId?clientId=" + clientId);
+        ordersForThisClients = await RouteHelper.GetAllOrderByUserId(Http, clientId);
 
         await GetAllOrderStringsInOrder();
         StateHasChanged();
@@ -211,20 +212,18 @@
     {
         foreach (Order order in ordersForThisClients)
         {
-            order.OrderItems = await Http.GetFromJsonAsync<List<OrderItem>>($"https://localhost:7256/OrderItem/GetAllStringsByOrderListId?id={order.Id}");
+            order.OrderItems = await RouteHelper.GetAllStringsByOrderListId(Http, order.Id);
         }
     }
 
     private async Task LoadClient(int clientId)
     {
-        client = await Http.GetFromJsonAsync<Client>($"https://localhost:7256/Client/GetClientById?id={clientId}");
+        client = await RouteHelper.GetClientById(Http, clientId);
     }
 
     private async Task DeleteOrder(int id)
     {
-        var response = await Http.DeleteAsync($"https://localhost:7256/OrderItem/DeleteAllStringsForOrder?id={id}");
-        if (response.IsSuccessStatusCode)
-            await Http.DeleteAsync($"https://localhost:7256/Order/DeleteOrderList?id={id}");
+        await RouteHelper.DeleteOrderWithStrings(Http, id);
 
         await GetAllOrders(clientId);
     }

@@ -1,5 +1,6 @@
 ﻿@page "/"
 
+@using NSCBlazor.Client.Helpers
 @using NSCBlazor.Shared
 @using NSCBlazor.Shared.Models
 @using System.Text.Json
@@ -27,9 +28,6 @@
         color: black;
         background-color: oldlace;
     }
-    .add-btn:hover {
-        color: gray;
-    }
 
     .del-btn:hover {
         color: indianred;
@@ -44,18 +42,19 @@
 {
     <LoadingWheel />
 }
-else if (allOrdersFromDb.Count == 0)
+else if (allOrdersFromDb?.Count == 0 && allClients?.Count == 0)
 {
-    <label>Список заказов пуст.</label>
+    <p>Список заказов пуст.</p>
+    <p>Добавьте клиента, нажав <b>"Add client"</b> в меню слева.</p>
 }
-else
+else if (allOrdersFromDb?.Count == 0 && allClients?.Count > 0)
 {
-    <div class="d-flex justify-content-center">
-        <DxButton RenderStyle="ButtonRenderStyle.None"
-                  title="Добавить заказ"
-                  CssClass="fa fa-plus-circle fa-2x add-btn"
-                  Click="@(() => NavigationManager.NavigateTo("/order"))" />
-    </div>
+    <AddOrderBtn />
+    <span class="d-flex justify-content-center">Список заказов пуст.</span>
+}
+else if (allOrdersFromDb?.Count > 0 && allClients?.Count > 0)
+{
+    <AddOrderBtn />
 
 
     foreach (var order in ShowOrderInPage())
@@ -93,6 +92,7 @@ else
     }
 }
 
+
 @if (allOrdersFromDb?.Count > 2)
 {
     <DxPager PageCount="@PageCounter()"
@@ -111,49 +111,29 @@ else
     List<Client> allClients { get; set; }
     List<Order>? allOrdersFromDb { get; set; }
 
-    //private async Task GetAllOrderStringsInOrder()
-    //{
-    //    foreach (Order ordList in allOrdersFromDb)
-    //    {
-    //        ordList.OrderItems = await Http.GetFromJsonAsync<List<OrderItem>>($"https://localhost:7256/OrderItem/GetAllStringsByOrderListId?id={ordList.Id}");
-    //    }
-    //}
-
-    //private async Task GetAllOrders(int clientId)
-    //{
-    //    allOrdersFromDb = await Http.GetFromJsonAsync<List<Order>>("https://localhost:7256/Order/GetAllOrderListsByUserId?clientId=" + clientId);
-    //    await GetAllOrderStringsInOrder();
-    //    StateHasChanged();
-    //}
-    //private async Task GetAllOrdersFromDB()
-    //{
-    //    await GetAllOrdersFromDB();
-    //}
 
     protected override async Task OnInitializedAsync()
     {
+        await GetAllClient();
+
         await GetAllOrdersFromDB();
-        ShowOrderInPage();
+        if (allOrdersFromDb?.Count > 0)
+            ShowOrderInPage();
     }
 
     private async Task GetAllClient()
     {
-        allClients = await Http.GetFromJsonAsync<List<Client>>("https://localhost:7256/Client/GetAllClients");
-        //var resp = await Http.SendAsync(new HttpRequestMessage(HttpMethod.Get, "https:localhost:7256/Client/GetClientById?id=1"));
+        allClients = await RouteHelper.GetAllClients(Http);
 
         selectedClient = allClients?.FirstOrDefault();
 
         StateHasChanged();
     }
 
-    private async Task GetAllOrdersFromDB() //пока не используется
+    private async Task GetAllOrdersFromDB()
     {
-        allOrdersFromDb = await Http.GetFromJsonAsync<List<Order>>("https://localhost:7256/Order/GetAllOrdersFromDb");
+        allOrdersFromDb = await RouteHelper.GetAllOrdersFromDB(Http);
 
-        foreach (var order in allOrdersFromDb)
-        {
-            order.OrderItems = await Http.GetFromJsonAsync<List<OrderItem>>($"https://localhost:7256/OrderItem/GetAllStringsByOrderListId?id={order.Id}");
-        }
         StateHasChanged();
     }
 
@@ -171,30 +151,34 @@ else
 
     private async Task DeleteOrder(int id)
     {
-        var response = await Http.DeleteAsync($"https://localhost:7256/OrderItem/DeleteAllStringsForOrder?id={id}");
-        if (response.IsSuccessStatusCode)
-            await Http.DeleteAsync($"https://localhost:7256/Order/DeleteOrderList?id={id}");
+        await RouteHelper.DeleteOrderWithStrings(Http, id);
 
         GetAllOrdersFromDB();
     }
 
-    private List<Order> OrdersForShow;
+    private List<Order> OrdersForShow = new List<Order>();
     protected List<Order> ShowOrderInPage()
     {
-        if (allOrdersFromDb.Count <= countOrderInPage)
+        if (allOrdersFromDb?.Count > 0)
         {
-            OrdersForShow = allOrdersFromDb.GetRange(indexFirstElInPage, allOrdersFromDb.Count);
-        }
-        else if (allOrdersFromDb.Count > countOrderInPage && ((actPageNumb + 1) * countOrderInPage) <= allOrdersFromDb.Count)
-        {
-            OrdersForShow = allOrdersFromDb.GetRange(actPageNumb * countOrderInPage, countOrderInPage);
-        }
-        else if (allOrdersFromDb.Count > countOrderInPage && ((actPageNumb + 1) * countOrderInPage) > allOrdersFromDb.Count)
-        {
-            OrdersForShow = allOrdersFromDb.GetRange(actPageNumb * countOrderInPage, allOrdersFromDb.Count % countOrderInPage);
-        }
 
-        return OrdersForShow;
+            if (allOrdersFromDb.Count <= countOrderInPage)
+            {
+                OrdersForShow = allOrdersFromDb.GetRange(indexFirstElInPage, allOrdersFromDb.Count);
+            }
+            else if (allOrdersFromDb.Count > countOrderInPage && ((actPageNumb + 1) * countOrderInPage) <= allOrdersFromDb.Count)
+            {
+                OrdersForShow = allOrdersFromDb.GetRange(actPageNumb * countOrderInPage, countOrderInPage);
+            }
+            else if (allOrdersFromDb.Count > countOrderInPage && ((actPageNumb + 1) * countOrderInPage) > allOrdersFromDb.Count)
+            {
+                OrdersForShow = allOrdersFromDb.GetRange(actPageNumb * countOrderInPage, allOrdersFromDb.Count % countOrderInPage);
+            }
+
+            return OrdersForShow;
+        }
+        else
+        return OrdersForShow = new();
     }
 
     protected int PageCounter()

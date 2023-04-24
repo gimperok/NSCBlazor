@@ -6,9 +6,9 @@ namespace ProjectAPI.DBContext
 {
     public partial class ApplicationContext : DbContext
     {
-        public ApplicationContext() { }
+        public ApplicationContext() {}
 
-        public ApplicationContext(DbContextOptions<ApplicationContext> options) : base(options) { }
+        public ApplicationContext(DbContextOptions<ApplicationContext> options) : base(options) {}
 
 
         public DbSet<ClientMessage> Clients { get; set; }

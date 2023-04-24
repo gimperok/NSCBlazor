@@ -45,8 +45,5 @@ namespace ProjectJson.Interfaces
         public string? Tel { get; set; }
 
         public DateTime DateRegistration { get; set; }
-
-        //public List<OrderListMessage>? OrderLists { get; set; }
-
     }
 }
