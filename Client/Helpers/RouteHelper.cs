@@ -98,11 +98,13 @@ namespace NSCBlazor.Client.Helpers
         {
             return await Http.PostAsJsonAsync("https://localhost:7256/Client/AddClient", client);
         }
+
         //PUT
         public static async Task<HttpResponseMessage> EditClient(HttpClient Http, NSCBlazor.Shared.Models.Client client)
         {
             return await Http.PutAsJsonAsync("https://localhost:7256/Client/EditClient", client);
         }
+
         //DELETE
         public static async Task DeleteClient(HttpClient Http, int clientId)
         {

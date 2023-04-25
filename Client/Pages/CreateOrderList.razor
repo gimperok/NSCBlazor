@@ -123,7 +123,10 @@ else
     {
         <div class="d-flex justify-content-between">
             <div class="d-flex flex-row">
-                <label class="@GetFontColorClass(selectedClient?.FullName)" style="font-weight: 600;">@selectedClient?.FullName</label>
+                <a href="/client/@selectedClient?.Id" 
+                   style="text-decoration: none;"><span class="@GetFontColorClass(selectedClient?.FullName)" 
+                                                        style="font-weight: 600;" 
+                                                        title="Просмотреть @selectedClient?.FullName">@selectedClient?.FullName</span></a>
                 <span style="display:@VisibleChangeClient()">
                     <DxButton RenderStyle="ButtonRenderStyle.None"
                                       title="Сменить клиента"
@@ -330,8 +333,8 @@ else
             </div>
 
             <div class="d-flex flex-column">
-                <span style="font-weight:600;font-style: italic;">Итого: @order?.OrderTotalMoney$</span>
-                <span style="font-weight:600;font-style: italic;">Депозит: @order?.Deposit$</span>
+                <span style="font-weight:600;font-style: italic;">Итого: @order?.OrderTotalMoney.ToString("#.##")$</span>
+                <span style="font-weight:600;font-style: italic;">Депозит: @order?.Deposit.ToString("#.##")$</span>
             </div>
         </div>
     }

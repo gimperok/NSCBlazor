@@ -36,23 +36,7 @@ namespace ProjectAPI.Controllers
         /// <returns>Список всех клиентов</returns>
         [HttpGet]
         public List<ClientMessage> GetAllClients() => db.Clients.ToList();
-        //{
-        //    try
-        //    {
-        //        if (db.Clients?.Count() > 0)
-        //            return db.Clients.ToList();
-        //    }
-        //    catch (Exception e) { }
-        //    finally
-        //    {
-        //        Connection.State
-        //        //db.
-        //    }
 
-
-
-
-        //}
 
         /// <summary>
         /// Добавить клиента
@@ -106,6 +90,14 @@ namespace ProjectAPI.Controllers
             var client = db.Clients.FirstOrDefault(p => p.Id == id);
             if (client == null)
                 return false;
+
+            var orders = db.Orders.Where(x => x.ClientId == client.Id);
+            foreach (var order in orders)
+            {
+                var stirngs = db.OrderItems.Where(x => x.OrderId == order.Id);
+                db.OrderItems.RemoveRange(stirngs);
+            }
+            db.Orders.RemoveRange(orders);
 
             db.Clients.Remove(client);
             db.SaveChanges();

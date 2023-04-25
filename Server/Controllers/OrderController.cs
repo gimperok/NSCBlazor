@@ -63,10 +63,8 @@ namespace NSCBlazor.Server.Controllers
         /// <returns>Весь список заказов из БД</returns>
         [HttpGet]
         public async Task<List<OrderMessage>> GetAllOrdersFromDb()
-        {
-            List<OrderMessage> orderList = new List<OrderMessage>();
-            
-            orderList = await httpClient.GetFromJsonAsync<List<OrderMessage>>($"{AppSettings.GetApiUrl}{AppSettings.GetAllOrdersFromDb}");
+        {         
+            var orderList = await httpClient.GetFromJsonAsync<List<OrderMessage>>($"{AppSettings.GetApiUrl}{AppSettings.GetAllOrdersFromDb}");
 
             return orderList;
         }
