@@ -26,7 +26,15 @@ namespace ProjectAPI.Controllers
         [HttpGet]
         public ClientMessage GetClientById(int id)
         {
-            var client = db.Clients.FirstOrDefault(p => p.Id == id);
+            ClientMessage? client = null;
+            try
+            {
+                client = db.Clients.FirstOrDefault(p => p.Id == id);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine($"Ошибка получения обьекта из бд. Место: ClientController. Error text:{e.Message}");
+            }
             return client;
         }
 
@@ -35,7 +43,19 @@ namespace ProjectAPI.Controllers
         /// </summary>
         /// <returns>Список всех клиентов</returns>
         [HttpGet]
-        public List<ClientMessage> GetAllClients() => db.Clients.ToList();
+        public List<ClientMessage> GetAllClients()
+        {
+            List<ClientMessage>? allClients = null;
+            try
+            {
+                allClients = db.Clients.ToList();
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine($"Ошибка получения списка из бд. Место: ClientController. Error text:{e.Message}");
+            }
+            return allClients;
+        }
 
 
         /// <summary>
@@ -48,9 +68,17 @@ namespace ProjectAPI.Controllers
             if (!ModelState.IsValid)
                 return false;
 
-            db.Clients.Add(client);
-            db.SaveChanges();
-            return true;
+            try
+            {
+                db.Clients.Add(client);
+                db.SaveChanges();
+                return true;
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine($"Ошибка записи обьекта в бд. Место: ClientController. Error text:{e.Message}");
+                return false;
+            }            
         }
 
         /// <summary>
@@ -63,21 +91,30 @@ namespace ProjectAPI.Controllers
             if (!ModelState.IsValid)
                 return false;
 
-            var editClient = db.Clients.FirstOrDefault(p => p.Id == client.Id);
+            ClientMessage? editClient = null;
+            try
+            {
+                editClient = db.Clients.FirstOrDefault(p => p.Id == client.Id);
+                if(editClient != null)
+                {
+                    editClient.Name = client.Name;
+                    editClient.Surname = client.Surname;
+                    editClient.Country = client.Country;
+                    editClient.City = client.City;
+                    editClient.Cargo = client.Cargo;
+                    editClient.Tel = client.Tel;
 
-            if(editClient == null) 
+                    db.Clients.Update(editClient);
+                    db.SaveChanges();
+                    return true;
+                }
                 return false;
-
-            editClient.Name = client.Name;
-            editClient.Surname = client.Surname;
-            editClient.Country = client.Country;
-            editClient.City = client.City;
-            editClient.Cargo = client.Cargo;
-            editClient.Tel = client.Tel;
-
-            db.Clients.Update(editClient);
-            db.SaveChanges();
-            return true;
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine($"Ошибка записи обьекта в бд. Место: ClientController. Error text:{e.Message}");
+                return false;
+            }
         }
 
         /// <summary>
@@ -87,21 +124,29 @@ namespace ProjectAPI.Controllers
         [HttpDelete]
         public bool DeleteClientById(int id)
         {
-            var client = db.Clients.FirstOrDefault(p => p.Id == id);
-            if (client == null)
-                return false;
-
-            var orders = db.Orders.Where(x => x.ClientId == client.Id);
-            foreach (var order in orders)
+            try
             {
-                var stirngs = db.OrderItems.Where(x => x.OrderId == order.Id);
-                db.OrderItems.RemoveRange(stirngs);
-            }
-            db.Orders.RemoveRange(orders);
+                var client = db.Clients.FirstOrDefault(p => p.Id == id);
+                if (client == null)
+                    return false;
 
-            db.Clients.Remove(client);
-            db.SaveChanges();
-            return true;
+                var orders = db.Orders.Where(x => x.ClientId == client.Id);
+                foreach (var order in orders)
+                {
+                    var stirngs = db.OrderItems.Where(x => x.OrderId == order.Id);
+                    db.OrderItems.RemoveRange(stirngs);
+                }
+                db.Orders.RemoveRange(orders);
+
+                db.Clients.Remove(client);
+                db.SaveChanges();
+                return true;
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine($"Ошибка удаления обьекта из бд. Место: ClientController. Error text:{e.Message}");
+                return false;
+            }
         }
     }
 }

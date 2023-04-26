@@ -27,7 +27,15 @@ namespace ProjectAPI.Controllers
         [HttpGet]
         public async Task<OrderMessage> GetOrderById(int id)
         {
-            OrderMessage? orderList = db.Orders.Where(x => x.Id == id).FirstOrDefault();
+            OrderMessage? orderList = null;
+            try
+            {
+                orderList = db.Orders.Where(x => x.Id == id).FirstOrDefault();
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine($"Ошибка получения списка из бд. Место: OrderListController. Error text:{e.Message}");
+            }
             return orderList;
         }
 
@@ -40,10 +48,16 @@ namespace ProjectAPI.Controllers
         [HttpGet]
         public OrderMessage GetLastCreatedOrderListByUserId(int id)
         {
-            OrderMessage orderList = new OrderMessage();
-            if (db.Orders.Any())
-                orderList = db.Orders.Where(x => x.ClientId == id).OrderByDescending(s => s.DateCreate).FirstOrDefault();
-
+            OrderMessage? orderList = null;
+            try
+            {
+                if (db.Orders.Any())
+                    orderList = db.Orders.Where(x => x.ClientId == id).OrderByDescending(s => s.DateCreate).FirstOrDefault();
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine($"Ошибка получения обьекта из бд. Место: OrderListController. Error text:{e.Message}");
+            }
             return orderList;
         }
 
@@ -56,13 +70,18 @@ namespace ProjectAPI.Controllers
         [HttpGet]
         public async Task<List<OrderMessage>> GetAllOrderListsByUserId(int clientId)
         {
-            List<OrderMessage> orderLists = new List<OrderMessage>();
-
-            if (db.Orders.Any(x => x.ClientId == clientId))
+            List<OrderMessage>? orderLists = null;
+            try
             {
-                orderLists = db.Orders.Where(x => x.ClientId == clientId).OrderByDescending(t => t).Select(r => r).ToList();                
+                if (db.Orders.Any(x => x.ClientId == clientId))
+                {
+                    orderLists = db.Orders.Where(x => x.ClientId == clientId).OrderByDescending(t => t).Select(r => r).ToList();
+                }
             }
-
+            catch (Exception e)
+            {
+                Console.WriteLine($"Ошибка получения списка из бд. Место: OrderListController. Error text:{e.Message}");
+            }
             return orderLists;
         }
 
@@ -74,13 +93,19 @@ namespace ProjectAPI.Controllers
         [HttpGet]
         public async Task<List<OrderMessage>> GetAllOrdersFromDb()
         {
-            List<OrderMessage> allOrders = db.Orders.OrderByDescending(x => x.Id).ToList();
-
-            foreach (var order in allOrders)
+            List<OrderMessage>? allOrders = null;
+            try
             {
-                order.Client = db.Clients.Where(p => p.Id == order.ClientId).FirstOrDefault();
+                allOrders = db.Orders.OrderByDescending(x => x.Id).ToList();
+                foreach (var order in allOrders)
+                {
+                    order.Client = db.Clients.Where(p => p.Id == order.ClientId).FirstOrDefault();
+                }
             }
-
+            catch (Exception e)
+            {
+                Console.WriteLine($"Ошибка получения списка из бд. Место: OrderListController. Error text:{e.Message}");
+            }
             return allOrders;
         }
 
@@ -96,9 +121,17 @@ namespace ProjectAPI.Controllers
             if (!ModelState.IsValid)
                 return false;
 
-            db.Orders.Add(orderList);
-            db.SaveChanges();
-            return true;
+            try
+            {
+                db.Orders.Add(orderList);
+                db.SaveChanges();
+                return true;
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine($"Ошибка записи обьекта в бд. Место: OrderListController. Error text:{e.Message}");
+                return false;
+            }
         }
 
 
@@ -113,14 +146,22 @@ namespace ProjectAPI.Controllers
             if (!ModelState.IsValid)
                 return false;
 
-            var editOrderList = db.Orders.FirstOrDefault(p => p.Id == orderList.Id);
+            try
+            {
+                var editOrderList = db.Orders.FirstOrDefault(p => p.Id == orderList.Id);
 
-            if (editOrderList == null)
+                if (editOrderList == null)
+                    return false;
+
+                db.Orders.Update(editOrderList);
+                db.SaveChanges();
+                return true;
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine($"Ошибка редактирования обьекта в бд. Место: OrderListController. Error text:{e.Message}");
                 return false;
-
-            db.Orders.Update(editOrderList);
-            db.SaveChanges();
-            return true;
+            }
         }
 
 
@@ -132,13 +173,21 @@ namespace ProjectAPI.Controllers
         [HttpDelete]
         public bool DeleteOrderListById(int id)
         {
-            var orderList = db.Orders.FirstOrDefault(p => p.Id == id);
-            if (orderList == null)
-                return false;
+            try
+            {
+                var orderList = db.Orders.FirstOrDefault(p => p.Id == id);
+                if (orderList == null)
+                    return false;
 
-            db.Orders.Remove(orderList);
-            db.SaveChanges();
-            return true;
+                db.Orders.Remove(orderList);
+                db.SaveChanges();
+                return true;
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine($"Ошибка удаления обьекта из бд. Место: OrderListController. Error text:{e.Message}");
+                return false;
+            }
         }
     }
 }
