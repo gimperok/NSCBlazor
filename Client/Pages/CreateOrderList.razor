@@ -3,7 +3,8 @@
 
 
 @using NSCBlazor.Client.Helpers
-@using NSCBlazor.Shared.Models;
+@using NSCBlazor.Client.Shared
+@using NSCBlazor.Shared.Models
 @using ProjectJson.Models
 
 @inject HttpClient Http
@@ -148,82 +149,7 @@ else
 
 @if (order != null && orderString != null)
 {
-  
-    #region EnterString
-    <table style="width:100%; margin-top:10px;">
-        <tr>
-            <th><span class="text-center">Код</span></th>
-            <th><span class="text-center">Кожа</span></th>
-            <th><span class="text-center">Цвет</span></th>
-                      
-            <th><span class="text-center">35</span></th>
-            <th><span class="text-center">36</span></th>
-            <th><span class="text-center">37</span></th>
-            <th><span class="text-center">38</span></th>
-            <th><span class="text-center">39</span></th>
-            <th><span class="text-center">40</span></th>
-            <th><span class="text-center">41</span></th>
-
-            <th><span class="text-center">Пар</span></th>
-            <th><span class="text-center">Цена</span></th>
-            <th><span class="text-center">Итого</span></th>
-            <th><span class="text-center">Заметка</span></th>
-        </tr>
-
-        <tr>
-            <td style="width:10%;">
-                <DxTextBox @bind-Text="@orderString.Kod"
-                   NullText=""/>
-            </td>
-            <td style="width:14%;">
-                <DxTextBox @bind-Text="@orderString.Leather"
-                       NullText=""/>
-            </td>
-            <td style="width:14%;">
-                <DxTextBox @bind-Text="@orderString.Color"
-                       NullText=""/>
-            </td>
-            <td class="wid3">
-                <DxSpinEdit @bind-Value="@orderString.Size35" ShowSpinButtons="false"></DxSpinEdit>
-            </td>                                            
-            <td class="wid3">                                
-                <DxSpinEdit @bind-Value="@orderString.Size36" ShowSpinButtons="false"></DxSpinEdit>
-            </td>                                            
-            <td class="wid3">                                
-                <DxSpinEdit @bind-Value="@orderString.Size37" ShowSpinButtons="false"></DxSpinEdit>
-            </td>                                            
-            <td class="wid3">                                
-                <DxSpinEdit @bind-Value="@orderString.Size38" ShowSpinButtons="false"></DxSpinEdit>
-            </td>                                            
-            <td class="wid3">                                
-                <DxSpinEdit @bind-Value="@orderString.Size39" ShowSpinButtons="false"></DxSpinEdit>
-            </td>                                            
-            <td class="wid3">                                
-                <DxSpinEdit @bind-Value="@orderString.Size40" ShowSpinButtons="false"></DxSpinEdit>
-            </td>                                            
-            <td class="wid3">                                
-                <DxSpinEdit @bind-Value="@orderString.Size41" ShowSpinButtons="false"></DxSpinEdit>
-            </td>
-
-            <td class="wid4 item-theme">
-                <span>@orderString.TotalCountPairs</span>
-            </td>
-
-            <td class="wid4">
-                <DxSpinEdit @bind-Value="@orderString.Price" CssClass="item-theme" ShowSpinButtons="false"></DxSpinEdit>
-            </td>
-
-            <td class="wid5 item-theme">
-                <span>@orderString.TotalPrice</span>
-            </td>
-
-            <td style="width:26%;">
-                <DxTextBox @bind-Text="@orderString.Note"
-                       NullText=""/>
-            </td>
-        </tr>
-    </table>
-    #endregion
+    <EnterStringForm OrderString="@orderString" />
 
     <div @onclick="(()=>AddString())" class="order-item" >
         <i class="fa fa-plus" style="margin-right:5px;" />

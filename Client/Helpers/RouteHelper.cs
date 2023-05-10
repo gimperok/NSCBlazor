@@ -106,9 +106,10 @@ namespace NSCBlazor.Client.Helpers
         }
 
         //DELETE
-        public static async Task DeleteClient(HttpClient Http, int clientId)
+        public static async Task<bool> DeleteClient(HttpClient Http, int clientId)
         {
-            await Http.DeleteAsync("https://localhost:7256/Client/DeleteClient?id=" + clientId);
+            var response = await Http.DeleteAsync("https://localhost:7256/Client/DeleteClient?id=" + clientId);
+            return await response.Content.ReadFromJsonAsync<bool>();
         }
         #endregion
     }

@@ -1,0 +1,81 @@
+﻿@using NSCBlazor.Shared.Models
+
+
+<table style="width:100%; margin-top:10px;">
+    <tr>
+        <th><span class="text-center">Код</span></th>
+        <th><span class="text-center">Кожа</span></th>
+        <th><span class="text-center">Цвет</span></th>
+
+        <th><span class="text-center">35</span></th>
+        <th><span class="text-center">36</span></th>
+        <th><span class="text-center">37</span></th>
+        <th><span class="text-center">38</span></th>
+        <th><span class="text-center">39</span></th>
+        <th><span class="text-center">40</span></th>
+        <th><span class="text-center">41</span></th>
+
+        <th><span class="text-center">Пар</span></th>
+        <th><span class="text-center">Цена</span></th>
+        <th><span class="text-center">Итого</span></th>
+        <th><span class="text-center">Заметка</span></th>
+    </tr>
+
+    <tr>
+        <td style="width:10%;">
+            <DxTextBox @bind-Text="@OrderString.Kod"
+                       NullText="" />
+        </td>
+        <td style="width:14%;">
+            <DxTextBox @bind-Text="@OrderString.Leather"
+                       NullText="" />
+        </td>
+        <td style="width:14%;">
+            <DxTextBox @bind-Text="@OrderString.Color"
+                       NullText="" />
+        </td>
+        <td class="wid3">
+            <DxSpinEdit @bind-Value="@OrderString.Size35" ShowSpinButtons="false"></DxSpinEdit>
+        </td>
+        <td class="wid3">
+            <DxSpinEdit @bind-Value="@OrderString.Size36" ShowSpinButtons="false"></DxSpinEdit>
+        </td>
+        <td class="wid3">
+            <DxSpinEdit @bind-Value="@OrderString.Size37" ShowSpinButtons="false"></DxSpinEdit>
+        </td>
+        <td class="wid3">
+            <DxSpinEdit @bind-Value="@OrderString.Size38" ShowSpinButtons="false"></DxSpinEdit>
+        </td>
+        <td class="wid3">
+            <DxSpinEdit @bind-Value="@OrderString.Size39" ShowSpinButtons="false"></DxSpinEdit>
+        </td>
+        <td class="wid3">
+            <DxSpinEdit @bind-Value="@OrderString.Size40" ShowSpinButtons="false"></DxSpinEdit>
+        </td>
+        <td class="wid3">
+            <DxSpinEdit @bind-Value="@OrderString.Size41" ShowSpinButtons="false"></DxSpinEdit>
+        </td>
+
+        <td class="wid4 item-theme">
+            <span>@OrderString.TotalCountPairs</span>
+        </td>
+
+        <td class="wid4">
+            <DxSpinEdit @bind-Value="@OrderString.Price" CssClass="item-theme" ShowSpinButtons="false"></DxSpinEdit>
+        </td>
+
+        <td class="wid5 item-theme">
+            <span>@OrderString.TotalPrice</span>
+        </td>
+
+        <td style="width:26%;">
+            <DxTextBox @bind-Text="@OrderString.Note"
+                       NullText="" />
+        </td>
+    </tr>
+</table>
+
+@code {
+    [Parameter]
+    public OrderItem OrderString { get; set; } = new();
+}

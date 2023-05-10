@@ -72,9 +72,14 @@ namespace NSCBlazor.Server.Controllers
         public async Task<bool> DeleteClient(int id)
         {
             var response = await httpClient.DeleteAsync($"{AppSettings.GetApiUrl}{AppSettings.DeleteClientById}" + id);
+
+            var result = false;
             if (response.IsSuccessStatusCode)
-                return true;
-            return false;
+            {
+                result = await response.Content.ReadFromJsonAsync<bool>();
+            }
+            return result;
+            //return await response.Content.ReadFromJsonAsync<bool?>() ?? false;
         }
     }
 }

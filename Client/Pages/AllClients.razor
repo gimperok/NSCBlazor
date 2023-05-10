@@ -142,10 +142,12 @@ else
 
     private async Task DeleteClient(int id)
     {
-        await RouteHelper.DeleteClient(Http, id);
-
-        await GetAllClient();
-        clientsForShow = allClients;
+        var deleteClientRequest = await RouteHelper.DeleteClient(Http, id);
+        if (deleteClientRequest)
+        {
+            await GetAllClient();
+            clientsForShow = allClients;
+        }
     }
 
     private async Task NavigToCreateOrderForThisClient(Client client)
