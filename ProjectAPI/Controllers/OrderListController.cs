@@ -27,7 +27,7 @@ namespace ProjectAPI.Controllers
         [HttpGet]
         public async Task<OrderMessage> GetOrderById(int id)
         {
-            OrderMessage orderList = new();
+            OrderMessage? orderList = new();
             try
             {
                 orderList = db.Orders.Where(x => x.Id == id).FirstOrDefault();
@@ -36,7 +36,7 @@ namespace ProjectAPI.Controllers
             {
                 Console.WriteLine($"Ошибка получения списка из бд. Место: OrderListController. Error text:{e.Message}");
             }
-            return orderList;
+            return orderList is null ? new() : orderList;
         }
 
 
@@ -48,7 +48,7 @@ namespace ProjectAPI.Controllers
         [HttpGet]
         public OrderMessage GetLastCreatedOrderListByUserId(int id)
         {
-            OrderMessage orderList = new();
+            OrderMessage? orderList = new();
             try
             {
                 if (db.Orders.Any())
@@ -58,7 +58,7 @@ namespace ProjectAPI.Controllers
             {
                 Console.WriteLine($"Ошибка получения обьекта из бд. Место: OrderListController. Error text:{e.Message}");
             }
-            return orderList;
+            return orderList is null ? new() : orderList;
         }
 
 
@@ -70,7 +70,7 @@ namespace ProjectAPI.Controllers
         [HttpGet]
         public async Task<List<OrderMessage>> GetAllOrderListsByUserId(int clientId)
         {
-            List<OrderMessage> orderLists = new();
+            List<OrderMessage>? orderLists = new();
             try
             {
                 if (db.Orders.Any(x => x.ClientId == clientId))
@@ -82,7 +82,7 @@ namespace ProjectAPI.Controllers
             {
                 Console.WriteLine($"Ошибка получения списка из бд. Место: OrderListController. Error text:{e.Message}");
             }
-            return orderLists;
+            return orderLists is null ? new() : orderLists;
         }
 
 
@@ -93,20 +93,23 @@ namespace ProjectAPI.Controllers
         [HttpGet]
         public async Task<List<OrderMessage>> GetAllOrdersFromDb()
         {
-            List<OrderMessage> allOrders = new();
+            List<OrderMessage>? allOrders = new();
             try
             {
                 allOrders = db.Orders.OrderByDescending(x => x.Id).ToList();
-                foreach (var order in allOrders)
+                if(allOrders != null && allOrders.Any())
                 {
-                    order.Client = db.Clients.Where(p => p.Id == order.ClientId).FirstOrDefault();
+                    foreach (var order in allOrders)
+                    {
+                        order.Client = db.Clients.Where(p => p.Id == order.ClientId).FirstOrDefault();
+                    }
                 }
             }
             catch (Exception e)
             {
                 Console.WriteLine($"Ошибка получения списка из бд. Место: OrderListController. Error text:{e.Message}");
             }
-            return allOrders;
+            return allOrders is null ? new() : allOrders;
         }
 
 

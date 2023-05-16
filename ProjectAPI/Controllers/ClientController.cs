@@ -26,7 +26,7 @@ namespace ProjectAPI.Controllers
         [HttpGet]
         public ClientMessage GetClientById(int id)
         {
-            ClientMessage client = new();
+            ClientMessage? client = new();
             try
             {
                 client = db.Clients.FirstOrDefault(p => p.Id == id);
@@ -35,7 +35,7 @@ namespace ProjectAPI.Controllers
             {
                 Console.WriteLine($"Ошибка получения обьекта из бд. Место: ClientController. Error text:{e.Message}");
             }
-            return client;
+            return client is null ? new() : client;
         }
 
         /// <summary>
@@ -45,7 +45,7 @@ namespace ProjectAPI.Controllers
         [HttpGet]
         public List<ClientMessage> GetAllClients()
         {
-            List<ClientMessage> allClients = new();
+            List<ClientMessage>? allClients = new();
             try
             {
                 allClients = db.Clients.ToList();
@@ -54,7 +54,7 @@ namespace ProjectAPI.Controllers
             {
                 Console.WriteLine($"Ошибка получения списка из бд. Место: ClientController. Error text:{e.Message}");
             }
-            return allClients;
+            return allClients is null ? new() : allClients;
         }
 
 
@@ -131,12 +131,15 @@ namespace ProjectAPI.Controllers
                     return false;
 
                 var orders = db.Orders.Where(x => x.ClientId == client.Id);
-                foreach (var order in orders)
+                if(orders != null)
                 {
-                    var stirngs = db.OrderItems.Where(x => x.OrderId == order.Id);
-                    db.OrderItems.RemoveRange(stirngs);
+                    foreach (var order in orders)
+                    {
+                        var stirngs = db.OrderItems.Where(x => x.OrderId == order.Id);
+                        db.OrderItems.RemoveRange(stirngs);
+                    }
+                    db.Orders.RemoveRange(orders);
                 }
-                db.Orders.RemoveRange(orders);
 
                 db.Clients.Remove(client);
                 db.SaveChanges();
