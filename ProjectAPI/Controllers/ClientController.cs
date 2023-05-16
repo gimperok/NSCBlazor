@@ -26,7 +26,7 @@ namespace ProjectAPI.Controllers
         [HttpGet]
         public ClientMessage GetClientById(int id)
         {
-            ClientMessage? client = null;
+            ClientMessage client = new();
             try
             {
                 client = db.Clients.FirstOrDefault(p => p.Id == id);
@@ -45,7 +45,7 @@ namespace ProjectAPI.Controllers
         [HttpGet]
         public List<ClientMessage> GetAllClients()
         {
-            List<ClientMessage>? allClients = null;
+            List<ClientMessage> allClients = new();
             try
             {
                 allClients = db.Clients.ToList();
@@ -91,7 +91,7 @@ namespace ProjectAPI.Controllers
             if (!ModelState.IsValid)
                 return false;
 
-            ClientMessage? editClient = null;
+            ClientMessage editClient = new();
             try
             {
                 editClient = db.Clients.FirstOrDefault(p => p.Id == client.Id);

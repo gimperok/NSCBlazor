@@ -26,7 +26,7 @@ namespace ProjectAPI.Controllers
         [HttpGet]
         public List<OrderItemMessage> GetAllStringsByOrderListId(int orderId)
         {
-            List<OrderItemMessage>? orderStringsList = new List<OrderItemMessage>();
+            List<OrderItemMessage> orderStringsList = new List<OrderItemMessage>();
             try
             {
                 if (db.OrderItems.Any(p => p.OrderId == orderId))

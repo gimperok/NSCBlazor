@@ -170,15 +170,12 @@
         if (clientId > 0)
         {
             await LoadClient(clientId);
-            AddOrEditLabel = "Изменить клиента:";
-            iconPeople = "fa fa-user";
+
             await GetAllOrders(clientId);
         }
-        else
-        {
-            AddOrEditLabel = "Добавить клиента:";
-            iconPeople = "fa fa-user-plus";
-        }
+
+        AddOrEditLabel = clientId > 0 ? "Изменить клиента:" : "Добавить клиента:";
+        iconPeople = clientId > 0 ? "fa fa-user" : "fa fa-user-plus";
         labelButton = "Сохранить";
     }
 

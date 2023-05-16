@@ -27,7 +27,7 @@ namespace ProjectAPI.Controllers
         [HttpGet]
         public async Task<OrderMessage> GetOrderById(int id)
         {
-            OrderMessage? orderList = null;
+            OrderMessage orderList = new();
             try
             {
                 orderList = db.Orders.Where(x => x.Id == id).FirstOrDefault();
@@ -48,7 +48,7 @@ namespace ProjectAPI.Controllers
         [HttpGet]
         public OrderMessage GetLastCreatedOrderListByUserId(int id)
         {
-            OrderMessage? orderList = null;
+            OrderMessage orderList = new();
             try
             {
                 if (db.Orders.Any())
@@ -70,7 +70,7 @@ namespace ProjectAPI.Controllers
         [HttpGet]
         public async Task<List<OrderMessage>> GetAllOrderListsByUserId(int clientId)
         {
-            List<OrderMessage>? orderLists = null;
+            List<OrderMessage> orderLists = new();
             try
             {
                 if (db.Orders.Any(x => x.ClientId == clientId))
@@ -93,7 +93,7 @@ namespace ProjectAPI.Controllers
         [HttpGet]
         public async Task<List<OrderMessage>> GetAllOrdersFromDb()
         {
-            List<OrderMessage>? allOrders = null;
+            List<OrderMessage> allOrders = new();
             try
             {
                 allOrders = db.Orders.OrderByDescending(x => x.Id).ToList();

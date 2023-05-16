@@ -8,7 +8,10 @@ namespace ProjectAPI.DBContext
     {
         public ApplicationContext() {}
 
-        public ApplicationContext(DbContextOptions<ApplicationContext> options) : base(options) {}
+        public ApplicationContext(DbContextOptions<ApplicationContext> options) : base(options) 
+        {
+            Database.EnsureCreated();
+        }
 
 
         public DbSet<ClientMessage> Clients { get; set; }
