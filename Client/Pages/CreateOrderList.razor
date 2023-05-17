@@ -244,12 +244,23 @@ else
                         <DxButton RenderStyle="ButtonRenderStyle.None"
                           title="Удалить строку"
                           CssClass="fa fa-trash del-red" 
-                          Click="@(() => DelString(context.DataItem as OrderItem))" />
+                          Click="(() => OpenDialogeWindow(context.DataItem as OrderItem))" />
                     </CellDisplayTemplate>
                 </DxGridCommandColumn>
 
             </Columns>
         </DxGrid>
+
+        @if (DeleteDialogOpen)
+        {
+            <ModalWindow Title="Подтверждение удаления" 
+                         BodyText="Вы действительно хотите удалить строку?" 
+                         BackgroundFormColor="whitesmoke"
+                         OnClose="@ConfirmDelete_Click" 
+                         DialogType="ModalWindow.ModalDialogType.DeleteCancel">
+            </ModalWindow>
+        }
+     
 
         <hr />
         <div class="d-flex justify-content-between">
@@ -274,13 +285,17 @@ else
 
 @code {
 
+
     [Parameter]
     public int? orderId { get; set; }
 
     [Parameter]
     public int testClientid { get; set; }
 
+    private bool DeleteDialogOpen { get; set; }
+
     Order order;
+    OrderItem? stringToDelete;
     OrderItem orderString = new OrderItem();
 
     List<Client> allClients;
@@ -430,6 +445,26 @@ else
         if (resp.IsSuccessStatusCode)
             order.OrderItems.Remove(orderString);
 
+        StateHasChanged();
+    }
+
+    private void OpenDialogeWindow(OrderItem item)
+    {
+        stringToDelete = new();
+        DeleteDialogOpen = true;
+        stringToDelete = item;
+        StateHasChanged();
+    }
+
+    private async Task ConfirmDelete_Click(bool accepted)
+    {
+        if (accepted && stringToDelete is not null)
+        {
+            await DelString(stringToDelete);
+            stringToDelete = null;
+        }
+
+        DeleteDialogOpen = false;
         StateHasChanged();
     }
 

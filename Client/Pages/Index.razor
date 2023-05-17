@@ -77,7 +77,7 @@ else if (allOrdersFromDb?.Count > 0 && allClients?.Count > 0)
                         <DxButton RenderStyle="ButtonRenderStyle.None"
                                   title="Удалить заказ"
                                   CssClass="fa fa-trash del-btn"
-                                  Click="@(() => DeleteOrder(order.Id))" />
+                                  Click="@(() => OpenDialogeWindow(order.Id))" />
                     </div>
                 </div>
             </div>
@@ -89,6 +89,15 @@ else if (allOrdersFromDb?.Count > 0 && allClients?.Count > 0)
             </div>
         </div>
 
+    }
+    @if (DeleteDialogOpen)
+    {
+        <ModalWindow Title="Подтверждение удаления"
+             BodyText=@DeleteText
+             BackgroundFormColor="whitesmoke"
+             OnClose="@ConfirmDelete_Click"
+             DialogType="ModalWindow.ModalDialogType.DeleteCancel">
+        </ModalWindow>
     }
 }
 
@@ -107,6 +116,9 @@ else if (allOrdersFromDb?.Count > 0 && allClients?.Count > 0)
     private int indexFirstElInPage = 0;
     private int actPageNumb = 0;
     private int countOrderInPage = 5;
+    private int orderToDeleteNumber { get; set; }
+    private bool DeleteDialogOpen { get; set; }
+    private string DeleteText = string.Empty;
     Client? selectedClient { get; set; }
     List<Client> allClients { get; set; }
     List<Order>? allOrdersFromDb { get; set; }
@@ -186,5 +198,26 @@ else if (allOrdersFromDb?.Count > 0 && allClients?.Count > 0)
         if (allOrdersFromDb?.Count() % countOrderInPage == 0)
             return allOrdersFromDb.Count() / countOrderInPage;
         return allOrdersFromDb.Count() / countOrderInPage + 1;
+    }
+
+    private void OpenDialogeWindow(int orderId)
+    {
+        orderToDeleteNumber = 0;
+        DeleteDialogOpen = true;
+        orderToDeleteNumber = orderId;
+        DeleteText = $"Вы действительно хотите удалить заказ №{orderToDeleteNumber}?";
+        StateHasChanged();
+    }
+
+    private async Task ConfirmDelete_Click(bool accepted)
+    {
+        if (accepted && orderToDeleteNumber > 0)
+        {
+            await DeleteOrder(orderToDeleteNumber);
+            orderToDeleteNumber = 0;
+        }
+
+        DeleteDialogOpen = false;
+        StateHasChanged();
     }
 }

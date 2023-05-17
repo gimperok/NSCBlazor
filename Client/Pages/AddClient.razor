@@ -142,7 +142,7 @@
                             <DxButton RenderStyle="ButtonRenderStyle.None"
                           title="Удалить заказ"
                           CssClass="fa fa-trash del-btn"
-                          Click="@(() => DeleteOrder(order.Id))" />
+                          Click="@(() => OpenDialogeWindow(order.Id))" />
                         </span>
                         
                     </div>
@@ -151,6 +151,16 @@
                 <hr />
             }
         </div>
+
+        @if (DeleteDialogOpen)
+        {
+            <ModalWindow Title="Подтверждение удаления"
+             BodyText=@DeleteText
+             BackgroundFormColor="whitesmoke"
+             OnClose="@ConfirmDelete_Click"
+             DialogType="ModalWindow.ModalDialogType.DeleteCancel">
+            </ModalWindow>
+        }
     }
 }
 
@@ -163,6 +173,9 @@
     Client client = new Client();
     List<Order> ordersForThisClients;
     private string? AddOrEditLabel, labelButton, notifMessage, iconPeople;
+    private int orderToDeleteNumber { get; set; }
+    private bool DeleteDialogOpen { get; set; }
+    private string DeleteText = string.Empty;
 
 
     protected override async Task OnInitializedAsync()
@@ -228,6 +241,27 @@
         await RouteHelper.DeleteOrderWithStrings(Http, id);
 
         await GetAllOrders(clientId);
+    }
+
+    private void OpenDialogeWindow(int orderId)
+    {
+        orderToDeleteNumber = 0;
+        DeleteDialogOpen = true;
+        orderToDeleteNumber = orderId;
+        DeleteText = $"Вы действительно хотите удалить заказ №{orderToDeleteNumber}?";
+        StateHasChanged();
+    }
+
+    private async Task ConfirmDelete_Click(bool accepted)
+    {
+        if (accepted && orderToDeleteNumber > 0)
+        {
+            await DeleteOrder(orderToDeleteNumber);
+            orderToDeleteNumber = 0;
+        }
+
+        DeleteDialogOpen = false;
+        StateHasChanged();
     }
 
     #region EmptyMethodForValidation

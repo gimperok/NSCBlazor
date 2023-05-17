@@ -90,7 +90,7 @@ else
                 <DxButton RenderStyle="ButtonRenderStyle.None"
                   title="Удалить клиента"
                   CssClass="fa fa-trash delClient-btn"
-                  Click="@(() => DeleteClient(client.Id))" />
+                  Click="@(() => OpenDialogeWindow(client.Id, $"{client.Name} {client.Surname}"))" />
             </div>
 
             <span style="font-style: italic; margin-left: 19px;">@client.Tel</span>
@@ -110,15 +110,29 @@ else
             </div>
         </div>
     }
+
+    @if (DeleteDialogOpen)
+    {
+        <ModalWindow Title="Подтверждение удаления"
+             BodyText=@DeleteText
+             BackgroundFormColor="whitesmoke"
+             OnClose="@ConfirmDelete_Click"
+             DialogType="ModalWindow.ModalDialogType.DeleteCancel">
+        </ModalWindow>
+    }
 }
 
 
 
 @code {
     private string SearchQuery { get; set; } = string.Empty;
+    private int clientIdToDelete { get; set; }
+    private bool DeleteDialogOpen { get; set; }
+    private string DeleteText = string.Empty;
 
     List<Client> allClients;
     List<Client> clientsForShow;
+
 
     protected override async Task OnInitializedAsync()
     {
@@ -166,5 +180,26 @@ else
                                           x?.Surname?.ToLower().Contains(SearchQuery.ToLower()) == false &&
                                           x?.City?.ToLower().Contains(SearchQuery.ToLower()) == false);
         }
+    }
+
+    private void OpenDialogeWindow(int clientId, string clientFullName)
+    {
+        clientIdToDelete = 0;
+        DeleteDialogOpen = true;
+        clientIdToDelete = clientId;
+        DeleteText = $"Вы действительно хотите удалить клиента {clientFullName}?";
+        StateHasChanged();
+    }
+
+    private async Task ConfirmDelete_Click(bool accepted)
+    {
+        if (accepted && clientIdToDelete > 0)
+        {
+            await DeleteClient(clientIdToDelete);
+            clientIdToDelete = 0;
+        }
+
+        DeleteDialogOpen = false;
+        StateHasChanged();
     }
 }

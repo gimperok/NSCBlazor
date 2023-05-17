@@ -1,0 +1,63 @@
+﻿<div class="modal fade show" id="exampleModalCenter" tabindex="-1" role="dialog" style="display:block; background-color: rgba(10,10,10,.2);"  aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content" style="background: @BackgroundFormColor">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLongTitle">@Title</h5>
+                <button type="button" class="close" style="border: none; background: none; font-weight: 600; color: gray" 
+                        @onclick="@ModalCancel">
+                        <span>&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p>@BodyText</p>
+            </div>
+            <div class="modal-footer">
+                @switch (DialogType)
+                {
+                    case ModalDialogType.Ok:
+                        <button type="button" class="btn btn-primary" @onclick="@ModalOk">Ok</button>
+                        break;
+                    case ModalDialogType.OkCancel:
+                        <button type="button" class="btn" @onclick="@ModalCancel">Отмена</button>
+                        <button type="button" class="btn btn-primary" @onclick="@ModalOk">Ok</button>
+                        break;
+                    case ModalDialogType.DeleteCancel:
+                        <button type="button" class="btn" @onclick="@ModalCancel">Отмена</button>
+                        <button type="button" class="btn btn-danger" @onclick="@ModalOk">Удалить</button>
+                        break;
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+@code {
+    [Parameter]
+    public string Title { get; set; } = string.Empty;
+    [Parameter]
+    public string BodyText { get; set; } = string.Empty;
+    [Parameter]
+    public string BackgroundFormColor { get; set; } = "white";
+    [Parameter]
+    public EventCallback<bool> OnClose { get; set; }
+    [Parameter]
+    public ModalDialogType DialogType { get; set; }
+
+    private Task ModalOk()
+    {
+        return OnClose.InvokeAsync(true);
+    }
+    private Task ModalCancel()
+    {
+        return OnClose.InvokeAsync(false);
+    }
+
+    public enum ModalDialogType
+    {
+        Ok,
+        OkCancel,
+        DeleteCancel
+    }
+}
