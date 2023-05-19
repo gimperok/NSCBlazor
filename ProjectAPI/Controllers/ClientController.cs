@@ -1,6 +1,8 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Cors.Infrastructure;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using ProjectAPI.DBContext;
+using ProjectAPI.Services.Repository.Interfaces;
 using ProjectJson.Models;
 using System.Text.Json;
 using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
@@ -11,12 +13,14 @@ namespace ProjectAPI.Controllers
     [ApiController]
     public class ClientController : ControllerBase
     {
-        private readonly ApplicationContext db;
 
-        public ClientController(ApplicationContext _db)
+        private readonly IBaseRepository<ClientMessage> clientRepository;
+
+        public ClientController(IBaseRepository<ClientMessage> _repository)
         {
-            db = _db;
+            clientRepository = _repository;
         }
+
 
         /// <summary>
         /// Получить клиента по его ID
@@ -26,16 +30,7 @@ namespace ProjectAPI.Controllers
         [HttpGet]
         public ClientMessage GetClientById(int id)
         {
-            ClientMessage? client = new();
-            try
-            {
-                client = db.Clients.FirstOrDefault(p => p.Id == id);
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine($"Ошибка получения обьекта из бд. Место: ClientController. Error text:{e.Message}");
-            }
-            return client is null ? new() : client;
+            return clientRepository.GetById(id);   
         }
 
         /// <summary>
@@ -45,18 +40,8 @@ namespace ProjectAPI.Controllers
         [HttpGet]
         public List<ClientMessage> GetAllClients()
         {
-            List<ClientMessage>? allClients = new();
-            try
-            {
-                allClients = db.Clients.ToList();
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine($"Ошибка получения списка из бд. Место: ClientController. Error text:{e.Message}");
-            }
-            return allClients is null ? new() : allClients;
+            return clientRepository.GetList();
         }
-
 
         /// <summary>
         /// Добавить клиента
@@ -67,54 +52,19 @@ namespace ProjectAPI.Controllers
         {
             if (!ModelState.IsValid)
                 return false;
-
-            try
-            {
-                db.Clients.Add(client);
-                db.SaveChanges();
-                return true;
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine($"Ошибка записи обьекта в бд. Место: ClientController. Error text:{e.Message}");
-                return false;
-            }            
+            return clientRepository.Add(client);
         }
 
         /// <summary>
         /// Изменить обьект клиента
         /// </summary>
-        /// <param name="editClient">Обьект клиента</param>
+        /// <param name="client">Обьект клиента</param>
         [HttpPut]
         public bool EditClient(ClientMessage client)
         {
             if (!ModelState.IsValid)
                 return false;
-
-            ClientMessage editClient = new();
-            try
-            {
-                editClient = db.Clients.FirstOrDefault(p => p.Id == client.Id);
-                if(editClient != null)
-                {
-                    editClient.Name = client.Name;
-                    editClient.Surname = client.Surname;
-                    editClient.Country = client.Country;
-                    editClient.City = client.City;
-                    editClient.Cargo = client.Cargo;
-                    editClient.Tel = client.Tel;
-
-                    db.Clients.Update(editClient);
-                    db.SaveChanges();
-                    return true;
-                }
-                return false;
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine($"Ошибка записи обьекта в бд. Место: ClientController. Error text:{e.Message}");
-                return false;
-            }
+            return clientRepository.Edit(client);
         }
 
         /// <summary>
@@ -124,32 +74,7 @@ namespace ProjectAPI.Controllers
         [HttpDelete]
         public bool DeleteClientById(int id)
         {
-            try
-            {
-                var client = db.Clients.FirstOrDefault(p => p.Id == id);
-                if (client == null)
-                    return false;
-
-                var orders = db.Orders.Where(x => x.ClientId == client.Id);
-                if(orders != null)
-                {
-                    foreach (var order in orders)
-                    {
-                        var stirngs = db.OrderItems.Where(x => x.OrderId == order.Id);
-                        db.OrderItems.RemoveRange(stirngs);
-                    }
-                    db.Orders.RemoveRange(orders);
-                }
-
-                db.Clients.Remove(client);
-                db.SaveChanges();
-                return true;
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine($"Ошибка удаления обьекта из бд. Место: ClientController. Error text:{e.Message}");
-                return false;
-            }
+            return clientRepository.Delete(id);
         }
     }
 }

@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using ProjectAPI.DBContext;
 using ProjectAPI.Models;
+using ProjectAPI.Services.Repository.Interfaces;
 using ProjectJson.Models;
 using System.Text.Json;
 
@@ -11,12 +12,14 @@ namespace ProjectAPI.Controllers
     [ApiController]
     public class OrderStringController : ControllerBase
     {
-        private readonly ApplicationContext db;
 
-        public OrderStringController(ApplicationContext _db)
+        private readonly IOrderItemRepository orderItemRepository;
+
+        public OrderStringController(IOrderItemRepository _repository)
         {
-            db = _db;
+            orderItemRepository = _repository;
         }
+
 
         /// <summary>
         /// Получить все строки заказа по ID заказа
@@ -26,17 +29,7 @@ namespace ProjectAPI.Controllers
         [HttpGet]
         public List<OrderItemMessage> GetAllStringsByOrderListId(int orderId)
         {
-            List<OrderItemMessage>? orderStringsList = new();
-            try
-            {
-                if (db.OrderItems.Any(p => p.OrderId == orderId))
-                    orderStringsList = db.OrderItems.Where(p => p.OrderId == orderId).ToList();
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine($"Ошибка получения списка из бд. Место: OrderStringController. Error text:{e.Message}");
-            }           
-            return orderStringsList is null? new() : orderStringsList;
+            return orderItemRepository.GetListItemsByOrderId(orderId);
         }
 
         /// <summary>
@@ -48,82 +41,19 @@ namespace ProjectAPI.Controllers
         {
             if (!ModelState.IsValid)
                 return false;
-
-            try
-            {
-                db.OrderItems.Add(orderString);
-
-                var order = db.Orders.Where(x => x.Id == orderString.OrderId).FirstOrDefault();
-                if (order != null)
-                {
-                    order.DateModify = DateTime.Now;
-
-                    db.Orders.Update(order);
-
-                    db.SaveChanges();
-                    return true;
-                }
-                return false;
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine($"Ошибка добавления обьекта в бд. Место: OrderStringController. Error text:{e.Message}");
-                return false;
-            }
+            return orderItemRepository.Add(orderString);
         }
 
         /// <summary>
         /// Изменить обьект строки
         /// </summary>
-        /// <param name="orderString">Обьект строки</param>
+        /// <param name="editedOrderString">Обьект строки</param>
         [HttpPut]
         public bool EditOrderString(OrderItemMessage editedOrderString)
         {
             if (!ModelState.IsValid)
                 return false;
-
-            try
-            {
-                var currentOrderString = db.OrderItems.FirstOrDefault(p => p.Id == editedOrderString.Id);
-
-                if (currentOrderString == null)
-                    return false;
-
-                currentOrderString.Kod = editedOrderString.Kod;
-                currentOrderString.Leather = editedOrderString.Leather;
-                currentOrderString.Color = editedOrderString.Color;
-
-                currentOrderString.Size35 = editedOrderString.Size35;
-                currentOrderString.Size36 = editedOrderString.Size36;
-                currentOrderString.Size37 = editedOrderString.Size37;
-                currentOrderString.Size38 = editedOrderString.Size38;
-                currentOrderString.Size39 = editedOrderString.Size39;
-                currentOrderString.Size40 = editedOrderString.Size40;
-                currentOrderString.Size41 = editedOrderString.Size41;
-
-                currentOrderString.Price = editedOrderString.Price;
-                currentOrderString.Note = editedOrderString.Note;
-
-
-                db.OrderItems.Update(currentOrderString);
-
-                var order = db.Orders.Where(x => x.Id == currentOrderString.OrderId).FirstOrDefault();
-                if (order != null)
-                {
-                    order.DateModify = DateTime.Now;
-
-                    db.Orders.Update(order);
-
-                    db.SaveChanges();
-                    return true;
-                }
-                return false;
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine($"Ошибка изменения обьекта в бд. Место: OrderStringController. Error text:{e.Message}");
-                return false;
-            }
+            return orderItemRepository.Edit(editedOrderString);
         }
 
         /// <summary>
@@ -133,31 +63,7 @@ namespace ProjectAPI.Controllers
         [HttpDelete]
         public bool DeleteOrderStringById(int id)
         {
-            try
-            {
-                var orderString = db.OrderItems.FirstOrDefault(p => p.Id == id);
-                if (orderString == null)
-                    return false;
-
-                db.OrderItems.Remove(orderString);
-
-                var order = db.Orders.Where(x => x.Id == orderString.OrderId).FirstOrDefault();
-                if(order != null)
-                {
-                    order.DateModify = DateTime.Now;
-
-                    db.Orders.Update(order);
-
-                    db.SaveChanges();
-                    return true;
-                }
-                return false;
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine($"Ошибка удаления обьекта из бд. Место: OrderStringController. Error text:{e.Message}");
-                return false;
-            }
+            return orderItemRepository.Delete(id);
         }
 
         /// <summary>
@@ -167,26 +73,7 @@ namespace ProjectAPI.Controllers
         [HttpDelete]
         public bool DeleteAllStringsForOrder(int id)
         {
-            try
-            {
-                var stringList = db.OrderItems.Where(p => p.OrderId == id).ToList();
-
-                if (stringList?.Count > 0)
-                {
-                    foreach (var str in stringList)
-                    {
-                        db.OrderItems.Remove(str);
-                    }
-                }
-
-                db.SaveChanges();
-                return true;
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine($"Ошибка удаления обьекта из бд. Место: OrderStringController. Error text:{e.Message}");
-                return false;
-            }
+            return orderItemRepository.DeleteListItemsByOrderId(id);
         }
     }
 }

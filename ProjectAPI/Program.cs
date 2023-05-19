@@ -1,6 +1,9 @@
 using Microsoft.EntityFrameworkCore;
 using ProjectAPI;
 using ProjectAPI.DBContext;
+using ProjectAPI.Services.Repository.Implementations;
+using ProjectAPI.Services.Repository.Interfaces;
+using ProjectJson.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -12,6 +15,10 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 builder.Services.AddDbContext<ApplicationContext>(options => options.UseSqlite(AppSettings.ConnectionString));
+
+builder.Services.AddScoped<IBaseRepository<ClientMessage>, ClientRepository>();
+builder.Services.AddScoped<IOrderRepository, OrderRepository>();
+builder.Services.AddScoped<IOrderItemRepository, OrderItemRepository>();
 
 var app = builder.Build();
 

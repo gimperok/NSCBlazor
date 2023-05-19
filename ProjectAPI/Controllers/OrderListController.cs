@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using ProjectAPI.DBContext;
+using ProjectAPI.Services.Repository.Interfaces;
 using ProjectJson.Models;
 using System.Net.Http;
 using System.Text.Json;
@@ -11,11 +12,12 @@ namespace ProjectAPI.Controllers
     [ApiController]
     public class OrderListController : ControllerBase
     {
-        private readonly ApplicationContext db;
 
-        public OrderListController(ApplicationContext _db)
+        private readonly IOrderRepository orderRepository;
+
+        public OrderListController(IOrderRepository _repository)
         {
-            db = _db;
+            orderRepository = _repository;
         }
 
 
@@ -27,18 +29,8 @@ namespace ProjectAPI.Controllers
         [HttpGet]
         public async Task<OrderMessage> GetOrderById(int id)
         {
-            OrderMessage? orderList = new();
-            try
-            {
-                orderList = db.Orders.Where(x => x.Id == id).FirstOrDefault();
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine($"Ошибка получения списка из бд. Место: OrderListController. Error text:{e.Message}");
-            }
-            return orderList is null ? new() : orderList;
+            return orderRepository.GetById(id);
         }
-
 
         /// <summary>
         /// Получить последний созданный заказ по ID клиента
@@ -48,19 +40,8 @@ namespace ProjectAPI.Controllers
         [HttpGet]
         public OrderMessage GetLastCreatedOrderListByUserId(int id)
         {
-            OrderMessage? orderList = new();
-            try
-            {
-                if (db.Orders.Any())
-                    orderList = db.Orders.Where(x => x.ClientId == id).OrderByDescending(s => s.DateCreate).FirstOrDefault();
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine($"Ошибка получения обьекта из бд. Место: OrderListController. Error text:{e.Message}");
-            }
-            return orderList is null ? new() : orderList;
+            return orderRepository.GetLastCreatedOrderByClientId(id);
         }
-
 
         /// <summary>
         /// Получить список заказов клиента по его ID
@@ -70,21 +51,8 @@ namespace ProjectAPI.Controllers
         [HttpGet]
         public async Task<List<OrderMessage>> GetAllOrderListsByUserId(int clientId)
         {
-            List<OrderMessage>? orderLists = new();
-            try
-            {
-                if (db.Orders.Any(x => x.ClientId == clientId))
-                {
-                    orderLists = db.Orders.Where(x => x.ClientId == clientId).OrderByDescending(t => t).Select(r => r).ToList();
-                }
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine($"Ошибка получения списка из бд. Место: OrderListController. Error text:{e.Message}");
-            }
-            return orderLists is null ? new() : orderLists;
+            return orderRepository.GetAllOrdersByClientId(clientId);
         }
-
 
         /// <summary>
         /// Получить список всех заказов из бд
@@ -93,25 +61,8 @@ namespace ProjectAPI.Controllers
         [HttpGet]
         public async Task<List<OrderMessage>> GetAllOrdersFromDb()
         {
-            List<OrderMessage>? allOrders = new();
-            try
-            {
-                allOrders = db.Orders.OrderByDescending(x => x.Id).ToList();
-                if(allOrders != null && allOrders.Any())
-                {
-                    foreach (var order in allOrders)
-                    {
-                        order.Client = db.Clients.Where(p => p.Id == order.ClientId).FirstOrDefault();
-                    }
-                }
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine($"Ошибка получения списка из бд. Место: OrderListController. Error text:{e.Message}");
-            }
-            return allOrders is null ? new() : allOrders;
+            return orderRepository.GetList();
         }
-
 
         /// <summary>
         /// Добавление заказа
@@ -123,20 +74,8 @@ namespace ProjectAPI.Controllers
         {
             if (!ModelState.IsValid)
                 return false;
-
-            try
-            {
-                db.Orders.Add(orderList);
-                db.SaveChanges();
-                return true;
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine($"Ошибка записи обьекта в бд. Место: OrderListController. Error text:{e.Message}");
-                return false;
-            }
+            return orderRepository.Add(orderList);
         }
-
 
         /// <summary>
         /// Изменение заказа
@@ -148,25 +87,8 @@ namespace ProjectAPI.Controllers
         {
             if (!ModelState.IsValid)
                 return false;
-
-            try
-            {
-                var editOrderList = db.Orders.FirstOrDefault(p => p.Id == orderList.Id);
-
-                if (editOrderList == null)
-                    return false;
-
-                db.Orders.Update(editOrderList);
-                db.SaveChanges();
-                return true;
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine($"Ошибка редактирования обьекта в бд. Место: OrderListController. Error text:{e.Message}");
-                return false;
-            }
+            return orderRepository.Edit(orderList);
         }
-
 
         /// <summary>
         /// Удаление заказа
@@ -176,21 +98,7 @@ namespace ProjectAPI.Controllers
         [HttpDelete]
         public bool DeleteOrderListById(int id)
         {
-            try
-            {
-                var orderList = db.Orders.FirstOrDefault(p => p.Id == id);
-                if (orderList == null)
-                    return false;
-
-                db.Orders.Remove(orderList);
-                db.SaveChanges();
-                return true;
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine($"Ошибка удаления обьекта из бд. Место: OrderListController. Error text:{e.Message}");
-                return false;
-            }
+            return orderRepository.Delete(id);
         }
     }
 }
