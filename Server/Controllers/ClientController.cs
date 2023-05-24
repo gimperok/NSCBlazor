@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using ProjectJson.Models;
+using SharedClient = NSCBlazor.Shared.Models.Client;
 
 
 namespace NSCBlazor.Server.Controllers
@@ -20,9 +21,9 @@ namespace NSCBlazor.Server.Controllers
         /// <param name="id">Идентификатор клиента</param>
         /// <returns>Обьект клиента</returns>
         [HttpGet]
-        public async Task<ClientMessage> GetClientById(int id)
+        public async Task<SharedClient> GetClientById(int id)
         {
-            ClientMessage? client = await httpClient.GetFromJsonAsync<ClientMessage>($"{AppSettings.GetApiUrl}{AppSettings.GetClientById}" + id);
+            SharedClient? client = await httpClient.GetFromJsonAsync<SharedClient>($"{AppSettings.GetApiUrl}{AppSettings.GetClientById}" + id);
             return client;
         }
 

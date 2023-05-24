@@ -109,11 +109,11 @@
 
 @if (clientId > 0)
 {
-    if (ordersForThisClients == null)
+    if (client.Orders == null)
     {
         <LoadingWheel />
     }
-    else if (ordersForThisClients.Count == 0)
+    else if (client.Orders.Count == 0)
     {
         <span style="font-style: italic;">У данного клиента нет заказов.</span>
     }
@@ -129,8 +129,8 @@
                 <div class="col"><span style="margin-left: 30px;"> </span></div>
             </div>
             <hr />
-        
-            @foreach (var order in ordersForThisClients)
+
+            @foreach (var order in client.Orders)
             {
                 <div class="row" style="width: 70%;">
                     <div class="col" @onclick=@(() => NavigationManager.NavigateTo($"OrderForClient/{clientId}/{order?.Id}"))><span class="ord-string" style="margin-left: 30px; cursor:pointer;">Заказ № @order?.Id</span></div>
@@ -171,7 +171,7 @@
     public int clientId { get; set; }
 
     Client client = new Client();
-    List<Order> ordersForThisClients;
+    //List<Order> ordersForThisClients;
     private string? AddOrEditLabel, labelButton, notifMessage, iconPeople;
     private int orderToDeleteNumber { get; set; }
     private bool DeleteDialogOpen { get; set; }
@@ -217,7 +217,8 @@
 
     private async Task GetAllOrders(int clientId)
     {
-        ordersForThisClients = await RouteHelper.GetAllOrderByUserId(Http, clientId);
+        /*ordersForThisClients*/
+        client.Orders = await RouteHelper.GetAllOrderByUserId(Http, clientId);
 
         await GetAllOrderStringsInOrder();
         StateHasChanged();
@@ -225,7 +226,7 @@
 
     private async Task GetAllOrderStringsInOrder()
     {
-        foreach (Order order in ordersForThisClients)
+        foreach (Order order in client.Orders)
         {
             order.OrderItems = await RouteHelper.GetAllStringsByOrderListId(Http, order.Id);
         }

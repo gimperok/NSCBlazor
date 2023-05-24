@@ -52,9 +52,5 @@ namespace ProjectJson.Models
         public DateTime DateRegistration { get; set; } = DateTime.Now;
 
 
-        ///// <summary>
-        ///// список заказов
-        ///// </summary>
-        //public List<OrderMessage>? Orders { get; set; }
     }
 }
