@@ -37,10 +37,10 @@ namespace ProjectAPI.Controllers
         /// </summary>
         /// <param name="orderString">Обьект строки</param>
         [HttpPost]
-        public bool AddOrderString(OrderItemMessage orderString)
+        public int AddOrderString(OrderItemMessage orderString)
         {
             if (!ModelState.IsValid)
-                return false;
+                return int.MinValue;
             return orderItemRepository.Add(orderString);
         }
 

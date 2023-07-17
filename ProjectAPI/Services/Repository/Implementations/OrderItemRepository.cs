@@ -1,4 +1,5 @@
 ﻿using ProjectAPI.DBContext;
+using ProjectAPI.Models;
 using ProjectAPI.Services.Repository.Interfaces;
 using ProjectJson.Models;
 
@@ -20,7 +21,35 @@ namespace ProjectAPI.Services.Repository.Implementations
             try
             {
                 if (db.OrderItems.Any(p => p.OrderId == orderId))
-                    orderStringsList = db.OrderItems.Where(p => p.OrderId == orderId).ToList();
+                {
+                    var orderFromDb = db.Orders.Where(x => x.Id == orderId).Select(ord => new OrderMessage()
+                    {
+                        Id = ord.Id,
+                        DateCreate = ord.DateCreate,
+                        DateModify = ord.DateModify,
+                        ClientId = ord.ClientId,
+                    }).FirstOrDefault();
+
+                    orderStringsList = db.OrderItems.Where(p => p.OrderId == orderId).Select(item => new OrderItemMessage()
+                    {
+                        Id = item.Id,
+                        Kod = item.Kod,
+                        Leather = item.Leather,
+                        Color = item.Color,
+                        Size35 = item.Size35,
+                        Size36 = item.Size36,
+                        Size37 = item.Size37,
+                        Size38 = item.Size38,
+                        Size39 = item.Size39,
+                        Size40 = item.Size40,
+                        Size41 = item.Size41,
+                        Price = item.Price,
+                        Note = item.Note,
+                        OrderId = orderId,
+                        Order = orderFromDb
+                    }).ToList();
+                }
+
             }
             catch (Exception e)
             {
@@ -31,71 +60,108 @@ namespace ProjectAPI.Services.Repository.Implementations
             return orderStringsList is null ? new() : orderStringsList;
         }
 
-        public bool Add(OrderItemMessage entity)
+        public int Add(OrderItemMessage entity)
         {
+            if (db == null) return int.MinValue;
+
+            OrderItemDb orderItemDb = new();
+
             try
             {
-                db.OrderItems.Add(entity);
+                orderItemDb.Kod = entity.Kod;
+                orderItemDb.Leather = entity.Leather;
+                orderItemDb.Color = entity.Color;
+                orderItemDb.Size35 = entity.Size35;
+                orderItemDb.Size36 = entity.Size36;
+                orderItemDb.Size37 = entity.Size37;
+                orderItemDb.Size38 = entity.Size38;
+                orderItemDb.Size39 = entity.Size39;
+                orderItemDb.Size40 = entity.Size40;
+                orderItemDb.Size41 = entity.Size41;
+                orderItemDb.Price = entity.Price;
+                orderItemDb.Note = entity.Note;
+                orderItemDb.OrderId = entity.OrderId;
 
-                var order = db.Orders.Where(x => x.Id == entity.OrderId).FirstOrDefault();
-                if (order != null)
+                db.OrderItems.Add(orderItemDb);
+
+                var order = db.Orders.Where(x => x.Id == orderItemDb.OrderId).FirstOrDefault();
+
+                if(order == null)
                 {
-                    order.DateModify = DateTime.Now;
-
-                    db.Orders.Update(order);
-
-                    db.SaveChanges();
-                    return true;
+                    Console.WriteLine($"Ошибка! " +
+                                      $"[Класс {nameof(OrderItemRepository)} / метод {nameof(Add)}] : Объект {nameof(OrderMessage)} не найден.");
+                    return int.MinValue;
                 }
-                return false;
+
+                order.DateModify = DateTime.Now;
+
+                db.Orders.Update(order);
+
+                db.SaveChanges();
+                return orderItemDb.Id;
+                
             }
             catch (Exception e)
             {
                 Console.WriteLine($"Ошибка добавления обьекта в бд.\n" +
                                   $"Место: {nameof(OrderItemRepository)}/{nameof(Add)}.\n" +
                                   $"Error text:{e.Message}");
-                return false;
+                return int.MinValue;
             }
         }
 
         public bool Edit(OrderItemMessage entity)
         {
+            if (db == null) return false;
+
+            OrderItemDb orderItemDb = new();
+
             try
             {
-                var currentOrderString = db.OrderItems.FirstOrDefault(p => p.Id == entity.Id);
 
-                if (currentOrderString == null)
-                    return false;
+                orderItemDb = db.OrderItems.FirstOrDefault(p => p.Id == entity.Id);
 
-                currentOrderString.Kod = entity.Kod;
-                currentOrderString.Leather = entity.Leather;
-                currentOrderString.Color = entity.Color;
-
-                currentOrderString.Size35 = entity.Size35;
-                currentOrderString.Size36 = entity.Size36;
-                currentOrderString.Size37 = entity.Size37;
-                currentOrderString.Size38 = entity.Size38;
-                currentOrderString.Size39 = entity.Size39;
-                currentOrderString.Size40 = entity.Size40;
-                currentOrderString.Size41 = entity.Size41;
-
-                currentOrderString.Price = entity.Price;
-                currentOrderString.Note = entity.Note;
-
-
-                db.OrderItems.Update(currentOrderString);
-
-                var order = db.Orders.Where(x => x.Id == currentOrderString.OrderId).FirstOrDefault();
-                if (order != null)
+                if (orderItemDb == null)
                 {
-                    order.DateModify = DateTime.Now;
-
-                    db.Orders.Update(order);
-
-                    db.SaveChanges();
-                    return true;
+                    Console.WriteLine($"Ошибка! " +
+                                      $"[Класс {nameof(OrderItemRepository)} / метод {nameof(Edit)}] : Объект {nameof(OrderItemMessage)} не найден.");
+                    return false;
                 }
-                return false;
+
+                orderItemDb.Kod = entity.Kod;
+                orderItemDb.Leather = entity.Leather;
+                orderItemDb.Color = entity.Color;
+
+                orderItemDb.Size35 = entity.Size35;
+                orderItemDb.Size36 = entity.Size36;
+                orderItemDb.Size37 = entity.Size37;
+                orderItemDb.Size38 = entity.Size38;
+                orderItemDb.Size39 = entity.Size39;
+                orderItemDb.Size40 = entity.Size40;
+                orderItemDb.Size41 = entity.Size41;
+
+                orderItemDb.Price = entity.Price;
+                orderItemDb.Note = entity.Note;
+                orderItemDb.OrderId = entity.OrderId;
+
+
+                db.OrderItems.Update(orderItemDb);
+
+                var order = db.Orders.Where(x => x.Id == orderItemDb.OrderId).FirstOrDefault();
+
+                if(order == null)
+                {
+                    Console.WriteLine($"Ошибка! " +
+                                      $"[Класс {nameof(OrderItemRepository)} / метод {nameof(Edit)}] : Объект {nameof(OrderMessage)} не найден.");
+                    return false;
+                }
+
+                order.DateModify = DateTime.Now;
+
+                db.Orders.Update(order);
+
+                db.SaveChanges();
+                return true;
             }
             catch (Exception e)
             {
@@ -108,6 +174,8 @@ namespace ProjectAPI.Services.Repository.Implementations
 
         public bool Delete(int id)
         {
+            if (db == null) return false;
+
             try
             {
                 var orderString = db.OrderItems.FirstOrDefault(p => p.Id == id);
@@ -117,16 +185,19 @@ namespace ProjectAPI.Services.Repository.Implementations
                 db.OrderItems.Remove(orderString);
 
                 var order = db.Orders.Where(x => x.Id == orderString.OrderId).FirstOrDefault();
-                if (order != null)
+                if(order == null)
                 {
-                    order.DateModify = DateTime.Now;
-
-                    db.Orders.Update(order);
-
-                    db.SaveChanges();
-                    return true;
+                    Console.WriteLine($"Ошибка! " +
+                                      $"[Класс {nameof(OrderItemRepository)} / метод {nameof(Delete)}] : Объект {nameof(OrderMessage)} не найден.");
+                    return false;
                 }
-                return false;
+
+                order.DateModify = DateTime.Now;
+
+                db.Orders.Update(order);
+
+                db.SaveChanges();
+                return true;                
             }
             catch (Exception e)
             {
@@ -139,11 +210,16 @@ namespace ProjectAPI.Services.Repository.Implementations
 
         public bool DeleteListItemsByOrderId(int id)
         {
+            if (db == null) return false;
+
             try
             {
                 var stringList = db.OrderItems.Where(p => p.OrderId == id).ToList();
 
-                if (stringList?.Count > 0)
+                if (stringList == null)
+                    return false;
+
+                if (stringList.Count > 0)
                 {
                     foreach (var str in stringList)
                     {
@@ -170,7 +246,22 @@ namespace ProjectAPI.Services.Repository.Implementations
             OrderItemMessage? orderItem = new();
             try
             {
-                orderItem = db.OrderItems.FirstOrDefault(p => p.Id == id);
+                orderItem = db.OrderItems.Where(p => p.Id == id).Select(item => new OrderItemMessage()
+                {
+                    Kod = item.Kod,
+                    Leather = item.Leather,
+                    Color = item.Color,
+                    Size35 = item.Size35,
+                    Size36 = item.Size36,
+                    Size37 = item.Size37,
+                    Size38 = item.Size38,
+                    Size39 = item.Size39,
+                    Size40 = item.Size40,
+                    Size41 = item.Size41,
+                    Price = item.Price,
+                    Note = item.Note,
+                    OrderId = item.OrderId,
+                }).FirstOrDefault();
             }
             catch (Exception e)
             {
@@ -187,7 +278,22 @@ namespace ProjectAPI.Services.Repository.Implementations
             List<OrderItemMessage>? allOrdersStrings = new();
             try
             {
-                allOrdersStrings = db.OrderItems.ToList();
+                allOrdersStrings = db.OrderItems.Select(item => new OrderItemMessage()
+                {
+                    Kod = item.Kod,
+                    Leather = item.Leather,
+                    Color = item.Color,
+                    Size35 = item.Size35,
+                    Size36 = item.Size36,
+                    Size37 = item.Size37,
+                    Size38 = item.Size38,
+                    Size39 = item.Size39,
+                    Size40 = item.Size40,
+                    Size41 = item.Size41,
+                    Price = item.Price,
+                    Note = item.Note,
+                    OrderId = item.OrderId,
+                }).ToList();
             }
             catch (Exception e)
             {

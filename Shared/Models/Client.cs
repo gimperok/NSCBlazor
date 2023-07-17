@@ -9,6 +9,9 @@ namespace NSCBlazor.Shared.Models
     /// </summary>
     public class Client : ClientMessage
     {
+
+        public string FullName => $"{Name} {Surname}";
+
         /// <summary>
         /// список заказов
         /// </summary>

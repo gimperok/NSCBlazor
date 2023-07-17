@@ -36,6 +36,5 @@ namespace ProjectJson.Models
         /// </summary>
         [ForeignKey(nameof(ClientId))]
         public ClientMessage? Client { get; set; }
-
     }
 }

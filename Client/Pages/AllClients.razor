@@ -144,7 +144,7 @@ else
 
     private async Task GetAllClient()
     {
-        allClients = await RouteHelper.GetAllClients(Http);
+        allClients = await Http.GetAllClients();
 
         StateHasChanged();
     }
@@ -156,7 +156,7 @@ else
 
     private async Task DeleteClient(int id)
     {
-        var deleteClientRequest = await RouteHelper.DeleteClient(Http, id);
+        var deleteClientRequest = await Http.DeleteClient(id);
         if (deleteClientRequest)
         {
             await GetAllClient();

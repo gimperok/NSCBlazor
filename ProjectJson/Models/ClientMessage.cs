@@ -1,6 +1,5 @@
 ﻿using ProjectJson.Interfaces;
 using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
 
 namespace ProjectJson.Models
 {
@@ -47,10 +46,6 @@ namespace ProjectJson.Models
         /// </summary>
         public string? Tel { get; set; }
 
-        public string FullName => $"{Name} {Surname}";
-
         public DateTime DateRegistration { get; set; } = DateTime.Now;
-
-
     }
 }

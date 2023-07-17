@@ -133,7 +133,7 @@
             @foreach (var order in client.Orders)
             {
                 <div class="row" style="width: 70%;">
-                    <div class="col" @onclick=@(() => NavigationManager.NavigateTo($"OrderForClient/{clientId}/{order?.Id}"))><span class="ord-string" style="margin-left: 30px; cursor:pointer;">Заказ № @order?.Id</span></div>
+                    <div class="col" @onclick=@(() => NavigationManager.NavigateTo($"OrderForClient/{clientId}/{order?.Id}"))><span class="ord-string" style="margin-left: 10px; cursor:pointer;">Заказ № @order?.Id</span></div>
                     <div class="col" @onclick=@(() => NavigationManager.NavigateTo($"OrderForClient/{clientId}/{order?.Id}"))><span class="ord-string" style="margin-left: 30px; cursor:pointer;">@order?.DateCreate?.ToShortDateString()</span></div>
                     <div class="col" @onclick=@(() => NavigationManager.NavigateTo($"OrderForClient/{clientId}/{order?.Id}"))><span class="ord-string" style="margin-left: 30px; cursor:pointer;">@((order?.TotalPairs == 0) ? "-" : $"{order?.TotalPairs}")</span></div>
                     <div class="col" @onclick=@(() => NavigationManager.NavigateTo($"OrderForClient/{clientId}/{order?.Id}"))><span class="ord-string" style="margin-left: 30px; cursor:pointer;">@((order?.OrderTotalMoney == 0) ? "-" : $"{order?.OrderTotalMoney}$")</span></div>
@@ -194,17 +194,19 @@
 
     private async Task SaveClient_Click(Client client)
     {
-        HttpResponseMessage? response;
+        bool resultResponse = false;
         if (clientId < 1)
         {
-            response = await RouteHelper.AddClient(Http, client);
-            if (!response.IsSuccessStatusCode)
-                return;
+            //response = await RouteHelper.AddClient(Http, client);
+            //if (!response.IsSuccessStatusCode)
+            //    return;
+            var newClientId = await Http.PostObject(client);
+
         }
         else
         {
-            response = await RouteHelper.EditClient(Http, client);
-            if (response.IsSuccessStatusCode)
+            resultResponse = await Http.PutObject(client);
+            if (resultResponse)
             {
                 notifMessage = "Данные пользователя успешно обновлены!";
                 await JSRuntime.InvokeVoidAsync("ShowNotification", "notifShow");
@@ -218,7 +220,7 @@
     private async Task GetAllOrders(int clientId)
     {
         /*ordersForThisClients*/
-        client.Orders = await RouteHelper.GetAllOrderByUserId(Http, clientId);
+        client.Orders = await Http.GetAllOrderByUserId(clientId);
 
         await GetAllOrderStringsInOrder();
         StateHasChanged();
@@ -228,18 +230,18 @@
     {
         foreach (Order order in client.Orders)
         {
-            order.OrderItems = await RouteHelper.GetAllStringsByOrderListId(Http, order.Id);
+            order.OrderItems = await Http.GetAllStringsByOrderListId(order.Id);
         }
     }
 
     private async Task LoadClient(int clientId)
     {
-        client = await RouteHelper.GetClientById(Http, clientId);
+        client = await Http.GetClientById(clientId);
     }
 
     private async Task DeleteOrder(int id)
     {
-        await RouteHelper.DeleteOrderWithStrings(Http, id);
+        await Http.DeleteOrderWithStrings(id);
 
         await GetAllOrders(clientId);
     }

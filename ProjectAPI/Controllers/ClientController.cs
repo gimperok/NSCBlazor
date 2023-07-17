@@ -48,10 +48,10 @@ namespace ProjectAPI.Controllers
         /// </summary>
         /// <param name="client">Обьект клиента</param>
         [HttpPost]
-        public bool AddClient(ClientMessage client)
+        public int AddClient(ClientMessage client)
         {
             if (!ModelState.IsValid)
-                return false;
+                return int.MinValue;
             return clientRepository.Add(client);
         }
 

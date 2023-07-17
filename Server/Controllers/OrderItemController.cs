@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using NSCBlazor.Client.Helpers;
 using ProjectJson.Models;
 
 namespace NSCBlazor.Server.Controllers
@@ -30,12 +31,12 @@ namespace NSCBlazor.Server.Controllers
         /// </summary>
         /// <param name="orderString">Обьект строки</param>
         [HttpPost]
-        public async Task<bool> AddOrderString(OrderItemMessage orderString)
+        public async Task<int> AddOrderString(OrderItemMessage orderString)
         {
             var response = await httpClient.PostAsJsonAsync($"{AppSettings.GetApiUrl}{AppSettings.AddOrderString}", orderString);
-            if (response.IsSuccessStatusCode)
-                return true;
-            return false;
+
+            var saveRes = await WebServiceHelper.GetContentFromResponse<int>(response);
+            return saveRes;
         }
 
         /// <summary>
@@ -46,9 +47,10 @@ namespace NSCBlazor.Server.Controllers
         public async Task<bool> EditOrderString(OrderItemMessage orderString)
         {
             var response = await httpClient.PutAsJsonAsync($"{AppSettings.GetApiUrl}{AppSettings.EditOrderString}", orderString);
-            if (response.IsSuccessStatusCode)
-                return true;
-            return false;
+
+            var updateRes = await WebServiceHelper.GetContentFromResponse<bool>(response);
+
+            return updateRes;
         }
 
         /// <summary>
@@ -59,9 +61,10 @@ namespace NSCBlazor.Server.Controllers
         public async Task<bool> DeleteOrderString(int id)
         {
             var response = await httpClient.DeleteAsync($"{AppSettings.GetApiUrl}{AppSettings.DeleteOrderStringById}" + id);
-            if (response.IsSuccessStatusCode)
-                return true;
-            return false;
+
+            var deleteRes = await WebServiceHelper.GetContentFromResponse<bool>(response);
+
+            return deleteRes;
         }
 
         /// <summary>
@@ -72,9 +75,10 @@ namespace NSCBlazor.Server.Controllers
         public async Task<bool> DeleteAllStringsForOrder(int id)
         {
             var response = await httpClient.DeleteAsync($"{AppSettings.GetApiUrl}{AppSettings.DeleteAllStringsForOrder}" + id);
-            if (response.IsSuccessStatusCode)
-                return true;
-            return false;
+
+            var deleteRes = await WebServiceHelper.GetContentFromResponse<bool>(response);
+
+            return deleteRes;
         }        
     }
 }

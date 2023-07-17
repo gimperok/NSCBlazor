@@ -5,7 +5,7 @@
         T GetById(int id);
         List<T> GetList();
 
-        bool Add(T entity);
+        int Add(T entity);
         bool Edit(T entity);
         bool Delete(int id);
     }

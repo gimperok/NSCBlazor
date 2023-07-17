@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using NSCBlazor.Client.Helpers;
 using ProjectJson.Models;
 using SharedClient = NSCBlazor.Shared.Models.Client;
 
@@ -43,12 +44,12 @@ namespace NSCBlazor.Server.Controllers
         /// </summary>
         /// <param name="client">Обьект клиента</param>
         [HttpPost]
-        public async Task<bool> AddClient(ClientMessage client)
+        public async Task<int> AddClient(ClientMessage client)
         {
             var response = await httpClient.PostAsJsonAsync($"{AppSettings.GetApiUrl}{AppSettings.AddClient}", client);
-            if (response.IsSuccessStatusCode)
-                return true;
-            return false;
+
+            var saveRes = await WebServiceHelper.GetContentFromResponse<int>(response);
+            return saveRes;
         }
 
         /// <summary>
@@ -60,9 +61,9 @@ namespace NSCBlazor.Server.Controllers
         {
             var response = await httpClient.PutAsJsonAsync($"{AppSettings.GetApiUrl}{AppSettings.EditClient}", editClient);
 
-            if (response.IsSuccessStatusCode)
-                return true;
-            return false;
+            var updateRes = await WebServiceHelper.GetContentFromResponse<bool>(response);
+
+            return updateRes;
         }
 
         /// <summary>
@@ -74,13 +75,9 @@ namespace NSCBlazor.Server.Controllers
         {
             var response = await httpClient.DeleteAsync($"{AppSettings.GetApiUrl}{AppSettings.DeleteClientById}" + id);
 
-            var result = false;
-            if (response.IsSuccessStatusCode)
-            {
-                result = await response.Content.ReadFromJsonAsync<bool>();
-            }
-            return result;
-            //return await response.Content.ReadFromJsonAsync<bool?>() ?? false;
+            var deleteRes = await WebServiceHelper.GetContentFromResponse<bool>(response);
+
+            return deleteRes;
         }
     }
 }

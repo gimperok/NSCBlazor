@@ -1,4 +1,5 @@
 ﻿using ProjectAPI.DBContext;
+using ProjectAPI.Models;
 using ProjectAPI.Services.Repository.Interfaces;
 using ProjectJson.Models;
 
@@ -16,10 +17,23 @@ namespace ProjectAPI.Services.Repository.Implementations
 
         public ClientMessage GetById(int id)
         {
-            ClientMessage? client = new();
+            ClientMessage? clientFromDb = new();
+
+            if (db == null) return clientFromDb;
+
             try
             {
-                client = db.Clients.FirstOrDefault(p => p.Id == id);
+                clientFromDb = db.Clients.Where(cl => cl.Id == id).Select(client => new ClientMessage()
+                {
+                    Id = client.Id,
+                    Name = client.Name,
+                    Surname = client.Surname,
+                    Country = client.Country,
+                    City = client.City,
+                    Cargo = client.Cargo,
+                    Tel = client.Tel,
+                    DateRegistration = client.DateRegistration                    
+                }).FirstOrDefault();
             }
             catch (Exception e)
             {
@@ -27,15 +41,25 @@ namespace ProjectAPI.Services.Repository.Implementations
                                   $"Место: {nameof(ClientRepository)}/{nameof(GetById)} \n" +
                                   $"Error text:{e.Message}");
             }
-            return client is null ? new() : client;
+            return clientFromDb ?? new ClientMessage();
         }
 
         public List<ClientMessage> GetList()
         {
-            List<ClientMessage>? allClients = new();
+            List<ClientMessage>? allClientsFromDb = new();
             try
             {
-                allClients = db.Clients.ToList();
+                allClientsFromDb = db.Clients.Select(client => new ClientMessage()
+                {
+                    Id = client.Id,
+                    Name = client.Name,
+                    Surname = client.Surname,
+                    Country = client.Country,
+                    City = client.City,
+                    Cargo = client.Cargo,
+                    Tel = client.Tel,
+                    DateRegistration = client.DateRegistration
+                }).ToList();
             }
             catch (Exception e)
             {
@@ -43,46 +67,67 @@ namespace ProjectAPI.Services.Repository.Implementations
                                   $"Место: {nameof(ClientRepository)}/{nameof(GetList)} \n" +
                                   $"Error text:{e.Message}");
             }
-            return allClients is null ? new() : allClients;
+            return allClientsFromDb is null ? new() : allClientsFromDb;
         }
 
-        public bool Add(ClientMessage entity)
+        public int Add(ClientMessage entity)
         {
+            if (db == null) return int.MinValue;
+
             try
             {
-                db.Clients.Add(entity);
+                ClientDb clientDb = new();
+
+                clientDb.Name = entity.Name;
+                clientDb.Surname = entity.Surname;
+                clientDb.Country = entity.Country;
+                clientDb.City = entity.City;
+                clientDb.Cargo = entity.Cargo;
+                clientDb.Tel = entity.Tel;
+                clientDb.DateRegistration = entity.DateRegistration;
+
+                db.Clients.Add(clientDb);
                 db.SaveChanges();
-                return true;
+                                               
+                int clientIdFromBd = clientDb.Id;
+                return clientIdFromBd;
             }
             catch (Exception e)
             {
                 Console.WriteLine($"Ошибка записи обьекта в бд.\n" +
                                   $"Место: {nameof(ClientRepository)}/{nameof(Add)} \n" +
                                   $"Error text:{e.Message}");
-                return false;
+                return int.MinValue;
             }
         }
 
         public bool Edit(ClientMessage entity)
         {
-            ClientMessage editClient = new();
+            if (db == null) return false;
+
+            ClientDb? clientDb = new();
+
             try
             {
-                editClient = db.Clients.FirstOrDefault(p => p.Id == entity.Id);
-                if (editClient != null)
-                {
-                    editClient.Name = entity.Name;
-                    editClient.Surname = entity.Surname;
-                    editClient.Country = entity.Country;
-                    editClient.City = entity.City;
-                    editClient.Cargo = entity.Cargo;
-                    editClient.Tel = entity.Tel;
+                clientDb = db.Clients.FirstOrDefault(p => p.Id == entity.Id);
 
-                    db.Clients.Update(editClient);
-                    db.SaveChanges();
-                    return true;
+                if(clientDb is null)
+                {
+                    Console.WriteLine($"Ошибка! " +
+                                      $"[Класс {nameof(ClientRepository)} / метод {nameof(Edit)}] : Объект {nameof(ClientDb)} не найден.");
+                    return false;
                 }
-                return false;
+
+                clientDb.Name = entity.Name;
+                clientDb.Surname = entity.Surname;
+                clientDb.Country = entity.Country;
+                clientDb.City = entity.City;
+                clientDb.Cargo = entity.Cargo;
+                clientDb.Tel = entity.Tel;
+
+                db.Clients.Update(clientDb);
+                db.SaveChanges();
+                return true;
             }
             catch (Exception e)
             {
@@ -95,22 +140,36 @@ namespace ProjectAPI.Services.Repository.Implementations
 
         public bool Delete(int id)
         {
+            if (db == null) return false;
+
             try
             {
                 var client = db.Clients.FirstOrDefault(p => p.Id == id);
-                if (client == null)
-                    return false;
 
-                var orders = db.Orders.Where(x => x.ClientId == client.Id);
-                if (orders != null)
+                if (client == null)
                 {
+                    Console.WriteLine($"Ошибка! " +
+                                      $"[Класс {nameof(ClientRepository)} / метод {nameof(Delete)}] : Объект {nameof(ClientDb)} не найден.");
+                    return false;
+                }
+
+                    var orders = db.Orders.Where(x => x.ClientId == client.Id);
+
+                    if(orders == null)
+                    {
+                        Console.WriteLine($"Ошибка! " +
+                                          $"[Класс {nameof(ClientRepository)} / метод {nameof(Delete)}] : " +
+                                          $"Связанные заказы для объекта ('{client.Name} {client.Surname}') не найдены.");
+                        return false;
+                    }
+
                     foreach (var order in orders)
                     {
                         var stirngs = db.OrderItems.Where(x => x.OrderId == order.Id);
                         db.OrderItems.RemoveRange(stirngs);
                     }
                     db.Orders.RemoveRange(orders);
-                }
+                
 
                 db.Clients.Remove(client);
                 db.SaveChanges();

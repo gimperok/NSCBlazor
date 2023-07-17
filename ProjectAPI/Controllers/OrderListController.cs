@@ -32,6 +32,7 @@ namespace ProjectAPI.Controllers
             return orderRepository.GetById(id);
         }
 
+        [Obsolete]
         /// <summary>
         /// Получить последний созданный заказ по ID клиента
         /// </summary>
@@ -70,10 +71,10 @@ namespace ProjectAPI.Controllers
         /// <param name="orderList">Обьект заказа</param>
         /// <returns></returns>
         [HttpPost]
-        public bool AddOrder(OrderMessage orderList)
+        public int AddOrder(OrderMessage orderList)
         {
             if (!ModelState.IsValid)
-                return false;
+                return int.MinValue;
             return orderRepository.Add(orderList);
         }
 

@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using NSCBlazor.Client.Helpers;
 using NSCBlazor.Shared.Models;
 using ProjectJson.Models;
 using System.Text.Json;
@@ -75,13 +76,15 @@ namespace NSCBlazor.Server.Controllers
         /// </summary>
         /// <param name="orderList">Обьект заказа</param>
         [HttpPost]
-        public async Task<bool> AddOrderList(OrderMessage orderList)
+        public async Task<int> AddOrderList(OrderMessage orderList)
         {
             var response = await httpClient.PostAsJsonAsync($"{AppSettings.GetApiUrl}{AppSettings.AddOrderList}", orderList);
 
-            if (response.IsSuccessStatusCode)
-                return true;
-            return false;
+            var saveRes = await WebServiceHelper.GetContentFromResponse<int>(response);
+            return saveRes;
+            //if (response.IsSuccessStatusCode)
+            //    return true;
+            //return false;
         }
 
 
@@ -94,9 +97,9 @@ namespace NSCBlazor.Server.Controllers
         {
             var response = await httpClient.PutAsJsonAsync($"{AppSettings.GetApiUrl}{AppSettings.EditOrderList}", orderList);
 
-            if (response.IsSuccessStatusCode)
-                return true;
-            return false;
+            var updateRes = await WebServiceHelper.GetContentFromResponse<bool>(response);
+
+            return updateRes;
         }
 
 
@@ -108,9 +111,10 @@ namespace NSCBlazor.Server.Controllers
         public async Task<bool> DeleteOrderList(int id)
         {
             var response = await httpClient.DeleteAsync($"{AppSettings.GetApiUrl}{AppSettings.DeleteOrderListById}" + id);
-            if (response.IsSuccessStatusCode)
-                return true;
-            return false;
+
+            var deleteRes = await WebServiceHelper.GetContentFromResponse<bool>(response);
+
+            return deleteRes;
         }
     }
 }

@@ -4,8 +4,8 @@
 @using NSCBlazor.Shared
 @using NSCBlazor.Shared.Models
 @using System.Text.Json
-@using ProjectJson.Models
-
+@*@using ProjectJson.Models
+*@
 @inject HttpClient Http
 @inject NavigationManager NavigationManager
 
@@ -62,7 +62,7 @@ else if (allOrdersFromDb?.Count > 0 && allClients?.Count > 0)
         <div class="order-item">
 
             <div class="d-flex justify-content-start" style="width:28%; flex-direction: column;">
-                <label style="font-weight: 600;"><a href="/order/@order.Id" style="text-decoration:none; color:black; cursor:pointer;">@order?.Client?.FullName</a></label>
+                <label style="font-weight: 600;"><a href="/order/@order.Id" style="text-decoration:none; color:black; cursor:pointer;">@order.Client?.FullName</a></label>
                 <label>Всего пар: @order.TotalPairs</label>
                 <label>Всего позиций: @order.TotalPosition</label>
             </div>
@@ -135,7 +135,7 @@ else if (allOrdersFromDb?.Count > 0 && allClients?.Count > 0)
 
     private async Task GetAllClient()
     {
-        allClients = await RouteHelper.GetAllClients(Http);
+        allClients = await Http.GetAllClients();
 
         selectedClient = allClients?.FirstOrDefault();
 
@@ -144,7 +144,7 @@ else if (allOrdersFromDb?.Count > 0 && allClients?.Count > 0)
 
     private async Task GetAllOrdersFromDB()
     {
-        allOrdersFromDb = await RouteHelper.GetAllOrdersFromDB(Http);
+        allOrdersFromDb = await Http.GetAllOrdersFromDB();
 
         StateHasChanged();
     }
@@ -163,7 +163,7 @@ else if (allOrdersFromDb?.Count > 0 && allClients?.Count > 0)
 
     private async Task DeleteOrder(int id)
     {
-        await RouteHelper.DeleteOrderWithStrings(Http, id);
+        await Http.DeleteOrderWithStrings(id);
 
         GetAllOrdersFromDB();
     }

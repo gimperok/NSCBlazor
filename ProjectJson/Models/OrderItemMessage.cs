@@ -64,19 +64,9 @@ namespace ProjectJson.Models
         public int Size41 { get; set; } = 0;
 
         /// <summary>
-        /// Всего пар в этой строке
-        /// </summary>
-        public int TotalCountPairs => Size35 + Size36 + Size37 + Size38 + Size39 + Size40 + Size41;
-
-        /// <summary>
         /// Цена одной позиции
         /// </summary>
         public double Price { get; set; } = 0.00;
-
-        /// <summary>
-        /// Общая цена серии
-        /// </summary>
-        public double TotalPrice => TotalCountPairs * Price;
 
         /// <summary>
         /// Заметка

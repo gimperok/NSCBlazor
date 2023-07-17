@@ -352,11 +352,7 @@ else
         {
             order.ClientId = selectedClient.Id;
 
-            var resp = await RouteHelper.AddOrder(Http, order);
-
-            if (resp.IsSuccessStatusCode)
-                order = await RouteHelper.GetLastCreatedOrderListByClientId(Http, selectedClient.Id);
-            orderId = order.Id;
+            orderId = await Http.PostObject(order);
         }
     }
 
@@ -370,11 +366,11 @@ else
                 orderString.Kod  = orderString?.Kod?.ToUpper();
                 orderString.Leather = orderString?.Leather?.ToUpper();
                 orderString.Color = orderString?.Color?.ToUpper();
-                orderString.OrderId = order.Id;
-                var resp = await RouteHelper.AddOrderString(Http, orderString);
-                if (resp.IsSuccessStatusCode)
+                orderString.OrderId = orderId;
+                var resp = await Http.PostObject(orderString);
+                if (resp > int.MinValue)
                 {
-                    order.OrderItems = await RouteHelper.GetAllStringsByOrderListId(Http, order.Id);
+                    order.OrderItems = await Http.GetAllStringsByOrderListId((int)orderId);
 
                     ClearFields();
 
@@ -399,7 +395,7 @@ else
 
     private async Task GetAllClient()
     {
-        allClients = await RouteHelper.GetAllClients(Http);
+        allClients = await Http.GetAllClients();
 
         StateHasChanged();
     }
@@ -424,14 +420,14 @@ else
     protected async Task GetClient(int? clientId)
     {
         if (clientId > 0)
-            selectedClient = await RouteHelper.GetClientById(Http, (int)clientId);
+            selectedClient = await Http.GetClientById((int)clientId);
     }
 
     protected async Task GetOrderById(int orderId)
     {
-        order = await RouteHelper.GetOrderById(Http, orderId);
+        order = await Http.GetOrderById(orderId);
 
-        var allOrderStringsList = await RouteHelper.GetAllStringsByOrderListId(Http, orderId);
+        var allOrderStringsList = await Http.GetAllStringsByOrderListId(orderId);
 
         if (order != null)
             order.OrderItems = allOrderStringsList;
@@ -440,12 +436,14 @@ else
     protected async Task DelString(OrderItem orderString)
     {
         orderString.OrderId = order.Id;
-        var resp = await RouteHelper.DeleteOrderString(Http, orderString);
+        var respResult = await Http.DeleteOrderString(orderString.Id);
 
-        if (resp.IsSuccessStatusCode)
+        if (respResult)
+        {
             order.OrderItems.Remove(orderString);
 
-        StateHasChanged();
+            StateHasChanged();
+        }
     }
 
     private void OpenDialogeWindow(OrderItem item)

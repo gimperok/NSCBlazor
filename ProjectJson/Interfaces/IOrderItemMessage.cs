@@ -65,19 +65,9 @@ namespace ProjectJson.Interfaces
         public int Size41 { get; set; }
 
         /// <summary>
-        /// Всего пар в этой строке
-        /// </summary>
-        public int TotalCountPairs { get; }
-
-        /// <summary>
         /// Цена одной позиции
         /// </summary>
         public double Price { get; set; }
-
-        /// <summary>
-        /// Общая цена серии
-        /// </summary>
-        public double TotalPrice { get; }
 
         /// <summary>
         /// Заметка

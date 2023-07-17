@@ -32,5 +32,8 @@ namespace NSCBlazor.Shared.Models
 
 
         public List<OrderItem>? OrderItems { get; set; } /*= new();*/
+
+        public Client? Client { get; set; }
+
     }
 }

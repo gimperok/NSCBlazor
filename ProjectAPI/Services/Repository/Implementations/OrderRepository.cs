@@ -1,4 +1,5 @@
 ﻿using ProjectAPI.DBContext;
+using ProjectAPI.Models;
 using ProjectAPI.Services.Repository.Interfaces;
 using ProjectJson.Models;
 
@@ -15,10 +16,32 @@ namespace ProjectAPI.Services.Repository.Implementations
 
         public OrderMessage GetById(int id)
         {
-            OrderMessage? orderList = new();
+            OrderMessage? orderFromDb = new();
             try
             {
-                orderList = db.Orders.Where(x => x.Id == id).FirstOrDefault();
+                orderFromDb = db.Orders.Where(x => x.Id == id).Select(ord => new OrderMessage()
+                {
+                    Id = ord.Id,
+                    DateCreate = ord.DateCreate,
+                    DateModify = ord.DateModify,
+                    ClientId = ord.ClientId,
+                }).FirstOrDefault();
+
+                if(orderFromDb != null)
+                {
+                    orderFromDb.Client = db.Clients.Where(cl => cl.Id == orderFromDb.ClientId)
+                    .Select(client => new ClientMessage()
+                    {
+                        Id = client.Id,
+                        Name = client.Name,
+                        Surname = client.Surname,
+                        Country = client.Country,
+                        City = client.City,
+                        Cargo = client.Cargo,
+                        Tel = client.Tel,
+                        DateRegistration = client.DateRegistration
+                    }).FirstOrDefault();
+                }
             }
             catch (Exception e)
             {
@@ -26,7 +49,7 @@ namespace ProjectAPI.Services.Repository.Implementations
                                   $"Место: {nameof(OrderRepository)}/{nameof(GetById)}\n" +
                                   $"Error text:{e.Message}");
             }
-            return orderList is null ? new() : orderList;
+            return orderFromDb is null ? new() : orderFromDb;
         }
 
         public OrderMessage GetLastCreatedOrderByClientId(int clientId)
@@ -35,7 +58,13 @@ namespace ProjectAPI.Services.Repository.Implementations
             try
             {
                 if (db.Orders.Any())
-                    orderList = db.Orders.Where(x => x.ClientId == clientId).OrderByDescending(s => s.DateCreate).FirstOrDefault();
+                    orderList = db.Orders.Where(x => x.ClientId == clientId).Select(ord => new OrderMessage()
+                    {
+                        Id = ord.Id,
+                        DateCreate = ord.DateCreate,
+                        DateModify = ord.DateModify,
+                        ClientId = ord.ClientId,
+                    }).OrderByDescending(s => s.DateCreate).FirstOrDefault();
             }
             catch (Exception e)
             {
@@ -53,7 +82,27 @@ namespace ProjectAPI.Services.Repository.Implementations
             {
                 if (db.Orders.Any(x => x.ClientId == clientId))
                 {
-                    orderLists = db.Orders.Where(x => x.ClientId == clientId).OrderByDescending(t => t).Select(r => r).ToList();
+                    ClientMessage? currentClient = db.Clients.Where(cl => cl.Id == clientId)
+                        .Select(client => new ClientMessage()
+                        {
+                            Id = client.Id,
+                            Name = client.Name,
+                            Surname = client.Surname,
+                            Country = client.Country,
+                            City = client.City,
+                            Cargo = client.Cargo,
+                            Tel = client.Tel,
+                            DateRegistration = client.DateRegistration
+                        }).FirstOrDefault();
+
+                    orderLists = db.Orders.Where(x => x.ClientId == clientId).Select(ord => new OrderMessage()
+                    {
+                        Id = ord.Id,
+                        DateCreate = ord.DateCreate,
+                        DateModify = ord.DateModify,
+                        ClientId = ord.ClientId,
+                        Client = currentClient
+                    }).OrderByDescending(t =>t.DateCreate).ToList();
                 }
             }
             catch (Exception e)
@@ -70,14 +119,28 @@ namespace ProjectAPI.Services.Repository.Implementations
             List<OrderMessage>? allOrders = new();
             try
             {
-                allOrders = db.Orders.OrderByDescending(x => x.Id).ToList();
-                if (allOrders != null && allOrders.Any())
-                {
-                    foreach (var order in allOrders)
+                List<ClientMessage> clientsList = db.Clients
+                    .Select(client => new ClientMessage()
                     {
-                        order.Client = db.Clients.Where(p => p.Id == order.ClientId).FirstOrDefault();
-                    }
-                }
+                        Id = client.Id,
+                        Name = client.Name,
+                        Surname = client.Surname,
+                        Country = client.Country,
+                        City = client.City,
+                        Cargo = client.Cargo,
+                        Tel = client.Tel,
+                        DateRegistration = client.DateRegistration
+                    }).ToList();
+
+                allOrders = db.Orders.Select(ord => new OrderMessage()
+                {
+                    Id = ord.Id,
+                    DateCreate = ord.DateCreate,
+                    DateModify = ord.DateModify,
+                    ClientId = ord.ClientId,
+                }).OrderByDescending(x => x.Id).ToList();
+
+                allOrders.ForEach(ord => ord.Client = clientsList.FirstOrDefault(cl => cl.Id == ord.ClientId));
             }
             catch (Exception e)
             {
@@ -90,33 +153,53 @@ namespace ProjectAPI.Services.Repository.Implementations
 
 
 
-        public bool Add(OrderMessage entity)
+        public int Add(OrderMessage entity)
         {
+            if (db == null) return int.MinValue;
+
             try
             {
-                db.Orders.Add(entity);
+                OrderDb orderDb = new();
+
+                orderDb.DateCreate = entity.DateCreate;
+                orderDb.ClientId = entity.ClientId;
+
+                db.Orders.Add(orderDb);
                 db.SaveChanges();
-                return true;
+
+                return orderDb.Id;
             }
             catch (Exception e)
             {
                 Console.WriteLine($"Ошибка записи обьекта в бд.\n" +
                                   $"Место: {nameof(OrderRepository)}/{nameof(Add)}\n" +
                                   $"Error text:{e.Message}");
-                return false;
+                return int.MinValue;
             }
         }
 
         public bool Edit(OrderMessage entity)
         {
+            if (db == null) return false;
+
+            OrderDb orderDb = new();
+
             try
             {
-                var editOrderList = db.Orders.FirstOrDefault(p => p.Id == entity.Id);
+                orderDb = db.Orders.FirstOrDefault(p => p.Id == entity.Id);
 
-                if (editOrderList == null)
+                if (orderDb == null)
+                {
+                    Console.WriteLine($"Ошибка! " +
+                                      $"[Класс {nameof(OrderRepository)} / метод {nameof(Edit)}] : Объект {nameof(OrderMessage)} не найден.");
                     return false;
+                }
 
-                db.Orders.Update(editOrderList);
+                orderDb.DateCreate = entity.DateCreate;
+                orderDb.DateModify = entity.DateModify;
+                orderDb.ClientId = entity.ClientId;
+
+                db.Orders.Update(orderDb);
                 db.SaveChanges();
                 return true;
             }
@@ -131,11 +214,17 @@ namespace ProjectAPI.Services.Repository.Implementations
 
         public bool Delete(int id)
         {
+            if (db == null) return false;
+
             try
             {
                 var orderList = db.Orders.FirstOrDefault(p => p.Id == id);
                 if (orderList == null)
+                {
+                    Console.WriteLine($"Ошибка! " +
+                                      $"[Класс {nameof(OrderRepository)} / метод {nameof(Delete)}] : Объект {nameof(OrderMessage)} не найден.");
                     return false;
+                }
 
                 db.Orders.Remove(orderList);
                 db.SaveChanges();
