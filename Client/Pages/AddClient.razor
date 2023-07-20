@@ -15,6 +15,34 @@
         display: none;
     }
 
+    .fontItalic{
+        font-style: italic;
+    }
+
+    .myHeader {
+        width: 70%;
+        background-color: rgba(255,255,255,0.35);
+        color: #3B3B3B;
+        font-family: Tahoma;
+        padding: 4px 0px 4px 15px;
+        border-radius:13px;
+    }
+
+    .iconPlace{
+        width: 30%;
+        min-width: 365px;
+        margin: 0 10px 0px 0;
+    }
+    .iconStyle{
+        color: rgba(250,240,230,0.75);
+        font-size: 250pt;
+    }
+    .editForm{
+        width: 50%;
+        min-width: 350px;
+        margin: 0 auto 0px 0;
+    }
+
     .btn-save {
         background-color: rgba(250,240,230,0.75);
         border: 2px solid whitesmoke;     
@@ -28,6 +56,17 @@
         border: 2px solid black;
         margin: 0 40%;
     }
+
+    .notifyStyle {
+        display: none;
+        justify-content: center;
+        color: green;
+    }
+
+    .tableRowHeader{
+        margin-left: 30px;
+        font-weight: 600;
+    }
     .height55{
         height: 55px;
     }
@@ -36,7 +75,12 @@
         color: indianred;
     }
 
-    .ord-string:hover {
+    .order-srting{
+        margin-left: 10px;
+        cursor: pointer;
+    }
+
+    .ord-string-hov:hover {
         color: darkgray;
         font-weight: 600;
     }
@@ -44,25 +88,21 @@
 
 
 
-<h3 class="mt-5">@AddOrEditLabel</h3>
+<h3 class="mt-5 myHeader">@AddOrEditLabel</h3>
 
-<div class="d-flex flex-row" style="width:100%;">
-    <div style="width: 30%;
-                min-width: 365px;
-                margin: 0 10px 0px 0;">
-        <i class="@iconPeople" style="color: rgba(250,240,230,0.75); font-size:250pt;"></i>
+<div class="d-flex flex-row mt-4" style="width:100%;">
+    <div class="iconPlace">
+        <i class="@iconPeople iconStyle"></i>
     </div>
 
-    <div style="width: 50%;
-                min-width: 350px;
-                margin: 0 auto 0px 0;">
+    <div class="editForm">
         <EditForm Model="@client"
                   OnValidSubmit="@HandleValidSubmit"
                   OnInvalidSubmit="@HandleInvalidSubmit"
                   Context="EditFormContext">
             <DataAnnotationsValidator />
 
-                <DxFormLayout CssClass="w-75">
+                <DxFormLayout CssClass="w-75 ">
                     <DxFormLayoutItem ColSpanMd="12" Caption="Имя" CssClass="height55">
                         <DxTextBox @bind-Text="@client.Name" />
                         <ValidationMessage For="@(() => client.Name)" />
@@ -104,7 +144,7 @@
 
 
 <div>
-    <span class="notifShow mt-3" style="display: none; justify-content: center; color: green;">@notifMessage</span>
+    <span class="notifShow mt-3 notifyStyle">@notifMessage</span>
 </div>
 
 @if (clientId > 0)
@@ -115,28 +155,28 @@
     }
     else if (client.Orders.Count == 0)
     {
-        <span style="font-style: italic;">У данного клиента нет заказов.</span>
+        <span class="fontItalic">У данного клиента нет заказов.</span>
     }
     else
     {
-        <h3 class="mt-5 mb-3">Список заказов:</h3>
+        <h3 class="mt-5 mb-3 myHeader" >Список заказов:</h3>
         <div style="width:70%;">
             <div class="row" style="width: 70%;">
-                <div class="col"><span style="margin-left: 30px;font-weight: 600;">Номер</span></div>
-                <div class="col"><span style="margin-left: 30px;font-weight: 600;">Дата</span></div>
-                <div class="col"><span style="margin-left: 30px;font-weight: 600;">Пар</span></div>
-                <div class="col"><span style="margin-left: 30px;font-weight: 600;">Сумма</span></div>
+                <div class="col"><span class="tableRowHeader">Номер</span></div>
+                <div class="col"><span class="tableRowHeader">Дата</span></div>
+                <div class="col"><span class="tableRowHeader">Пар</span></div>
+                <div class="col"><span class="tableRowHeader">Сумма</span></div>
                 <div class="col"><span style="margin-left: 30px;"> </span></div>
             </div>
-            <hr />
+            <hr style="width:97%"/>
 
             @foreach (var order in client.Orders)
             {
                 <div class="row" style="width: 70%;">
-                    <div class="col" @onclick=@(() => NavigationManager.NavigateTo($"OrderForClient/{clientId}/{order?.Id}"))><span class="ord-string" style="margin-left: 10px; cursor:pointer;">Заказ № @order?.Id</span></div>
-                    <div class="col" @onclick=@(() => NavigationManager.NavigateTo($"OrderForClient/{clientId}/{order?.Id}"))><span class="ord-string" style="margin-left: 30px; cursor:pointer;">@order?.DateCreate?.ToShortDateString()</span></div>
-                    <div class="col" @onclick=@(() => NavigationManager.NavigateTo($"OrderForClient/{clientId}/{order?.Id}"))><span class="ord-string" style="margin-left: 30px; cursor:pointer;">@((order?.TotalPairs == 0) ? "-" : $"{order?.TotalPairs}")</span></div>
-                    <div class="col" @onclick=@(() => NavigationManager.NavigateTo($"OrderForClient/{clientId}/{order?.Id}"))><span class="ord-string" style="margin-left: 30px; cursor:pointer;">@((order?.OrderTotalMoney == 0) ? "-" : $"{order?.OrderTotalMoney}$")</span></div>
+                    <div class="col" @onclick=@(() => NavigationManager.NavigateTo($"OrderForClient/{clientId}/{order?.Id}"))><span class="order-srting ord-string-hov">Заказ № @order?.Id</span></div>
+                    <div class="col" @onclick=@(() => NavigationManager.NavigateTo($"OrderForClient/{clientId}/{order?.Id}"))><span class="order-srting ord-string-hov">@order?.DateCreate?.ToShortDateString()</span></div>
+                    <div class="col" @onclick=@(() => NavigationManager.NavigateTo($"OrderForClient/{clientId}/{order?.Id}"))><span class="order-srting ord-string-hov">@((order?.TotalPairs == 0) ? "-" : $"{order?.TotalPairs}")</span></div>
+                    <div class="col" @onclick=@(() => NavigationManager.NavigateTo($"OrderForClient/{clientId}/{order?.Id}"))><span class="order-srting ord-string-hov">@((order?.OrderTotalMoney == 0) ? "-" : $"{order?.OrderTotalMoney}$")</span></div>
                     <div class="col">
                         <span style="margin-left: 30px;">
                             <DxButton RenderStyle="ButtonRenderStyle.None"
@@ -148,7 +188,7 @@
                     </div>
                 </div>
 
-                <hr />
+                <hr style="width:97%" />
             }
         </div>
 
@@ -171,7 +211,6 @@
     public int clientId { get; set; }
 
     Client client = new Client();
-    //List<Order> ordersForThisClients;
     private string? AddOrEditLabel, labelButton, notifMessage, iconPeople;
     private int orderToDeleteNumber { get; set; }
     private bool DeleteDialogOpen { get; set; }
@@ -197,11 +236,7 @@
         bool resultResponse = false;
         if (clientId < 1)
         {
-            //response = await RouteHelper.AddClient(Http, client);
-            //if (!response.IsSuccessStatusCode)
-            //    return;
             var newClientId = await Http.PostObject(client);
-
         }
         else
         {
@@ -219,7 +254,6 @@
 
     private async Task GetAllOrders(int clientId)
     {
-        /*ordersForThisClients*/
         client.Orders = await Http.GetAllOrderByUserId(clientId);
 
         await GetAllOrderStringsInOrder();
