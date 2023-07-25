@@ -12,6 +12,8 @@ namespace NSCBlazor.Shared.Models
 
         public string FullName => $"{Name} {Surname}";
 
+        public override string ToString() => $"{Name} {Surname}";
+
         /// <summary>
         /// список заказов
         /// </summary>

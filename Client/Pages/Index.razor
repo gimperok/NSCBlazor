@@ -62,7 +62,7 @@ else if (allOrdersFromDb?.Count > 0 && allClients?.Count > 0)
         <div class="order-item">
 
             <div class="d-flex justify-content-start" style="width:28%; flex-direction: column;">
-                <label style="font-weight: 600;"><a href="/order/@order.Id" style="text-decoration:none; color:black; cursor:pointer;">@order.Client?.FullName</a></label>
+                <label style="font-weight: 600;"><a href="/order/@order.Id" style="text-decoration:none; color:black; cursor:pointer;">@order.Client?.ToString()</a></label>
                 <label>Всего пар: @order.TotalPairs</label>
                 <label>Всего позиций: @order.TotalPosition</label>
             </div>

@@ -36,7 +36,7 @@
         color: transparent;
     }
 
-    .order-item{
+    .order-item {
         background-color: rgba(250,240,230,0.75);
         border: 2px solid whitesmoke;
         border-radius: 7px;
@@ -45,20 +45,22 @@
         padding: 3px 10px;
         width: fit-content;
     }
-    .order-item:hover {
-        cursor: pointer;
-        background-color: rgba(250,240,230,1.0);
-        border: 2px solid black;
-    }
+
+        .order-item:hover {
+            cursor: pointer;
+            background-color: rgba(250,240,230,1.0);
+            border: 2px solid black;
+        }
 
     .del-red:hover {
         color: indianred;
     }
+
     .print-btn:hover {
-        color:blue;
+        color: blue;
     }
 
-    .dxbs-grid>.card>.card-body, .dxbs-grid>.card>.card-header, .dxbs-grid>.card>.card-footer {
+    .dxbs-grid > .card > .card-body, .dxbs-grid > .card > .card-header, .dxbs-grid > .card > .card-footer {
         background-color: peachpuff;
     }
 
@@ -75,8 +77,8 @@
         font-weight: 600;
     }
 
-    .dx-test-table{
-        width:100%;
+    .dx-test-table {
+        width: 100%;
     }
 
     .my-grid .dxbs-grid-empty-data {
@@ -87,12 +89,12 @@
     .dxbs-grid > .card .dxbs-scroll-viewer:first-child > .dxbs-scroll-viewer-content > .dxbs-grid-table > colgroup + thead > tr:first-child {
         /*background-color: rgba(250,240,230,1);*/
         background-color: blanchedalmond;
-        border:2px solid black;
+        border: 2px solid black;
     }
 
     /*Тело таблицы*/
     .table-bordered > :not(caption) > * {
-    /*background-color: rgba(250,240,230,0.50);*/    
+        /*background-color: rgba(250,240,230,0.50);*/
         background-color: oldlace;
     }
 
@@ -102,7 +104,17 @@
         text-align: center;
     }
 
-    .wid3 {width:3%;} .wid4 {width: 4%;} .wid5 {width:5%;}
+    .wid3 {
+        width: 3%;
+    }
+
+    .wid4 {
+        width: 4%;
+    }
+
+    .wid5 {
+        width: 5%;
+    }
 </style>
 
 
@@ -111,35 +123,37 @@
 @if (selectedClient is null && testClientid == 0)
 {
     <DxComboBox Data="@allClients"
-                NullText="Выбрать клиента"
-                FilteringMode="DataGridFilteringMode.Contains"
-                TextFieldName="@nameof(Client.FullName)"
-                Value="@selectedClient"
-                CssClass="w-25 ml-27"
-                ValueChanged="@((Client client) => SelectedClientChanged(client))" />
+            NullText="Выбрать клиента"
+            FilteringMode="DataGridFilteringMode.Contains"
+            TextFieldName="@nameof(Client.FullName)"
+            Value="@selectedClient"
+            CssClass="w-25 ml-27"
+            ValueChanged="@((Client client) => SelectedClientChanged(client))" />
 }
 else
 {
-    if(order?.Id >= 0)
+    if (order?.Id >= 0)
     {
         <div class="d-flex justify-content-between">
             <div class="d-flex flex-row">
-                <a href="/client/@selectedClient?.Id" 
-                   style="text-decoration: none;"><span class="@GetFontColorClass(selectedClient?.FullName)" 
-                                                        style="font-weight: 600;" 
-                                                        title="Просмотреть @selectedClient?.FullName">@selectedClient?.FullName</span></a>
+                <a href="/client/@selectedClient?.Id"
+                    style="text-decoration: none;">
+                    <span class="@GetFontColorClass(selectedClient?.ToString())"
+                  style="font-weight: 600;"
+                  title="Просмотреть @selectedClient?.ToString()">@selectedClient?.ToString()</span>
+                </a>
                 <span style="display:@VisibleChangeClient()">
                     <DxButton RenderStyle="ButtonRenderStyle.None"
-                                      title="Сменить клиента"
-                                      CssClass="fa fa-times-circle"
-                                      Click="ChangeClientBtn_Click" />
+                      title="Сменить клиента"
+                      CssClass="fa fa-times-circle"
+                      Click="ChangeClientBtn_Click" />
                 </span>
             </div>
             <div>
                 <label class="@GetFontColorClass(order.Id)" style="font-weight: 600;">Заказ № @order?.Id</label>
             </div>
             <div>
-                <label style="font-weight: 600;" >@order?.DateCreate?.ToString("dd.MM.yyyy")</label>
+                <label style="font-weight: 600;">@order?.DateCreate?.ToString("dd.MM.yyyy")</label>
             </div>
         </div>
     }
@@ -151,22 +165,22 @@ else
 {
     <EnterStringForm OrderString="@orderString" />
 
-    <div @onclick="(()=>AddString())" class="order-item" >
+    <div @onclick="(()=>AddString())" class="order-item">
         <i class="fa fa-plus" style="margin-right:5px;" />
         <span>Добавить строку</span>
     </div>
-   
+
     @if (order?.OrderItems?.Count != 0)
     {
-        <DxGrid Data="@order?.OrderItems?.OrderByDescending(x =>x.Id)" 
-                PageSize="15"
-                CssClass="general-grid dx-test-table my-grid">
+        <DxGrid Data="@order?.OrderItems?.OrderByDescending(x =>x.Id)"
+        PageSize="15"
+        CssClass="general-grid dx-test-table my-grid">
             <Columns>
-                <DxGridDataColumn FieldName=@nameof(OrderItem.Kod) Caption="Код"      Width="10%" TextAlignment="GridTextAlignment.Center" />
+                <DxGridDataColumn FieldName=@nameof(OrderItem.Kod) Caption="Код" Width="10%" TextAlignment="GridTextAlignment.Center" />
                 <DxGridDataColumn FieldName=@nameof(OrderItem.Leather) Caption="Кожа" Width="15%" TextAlignment="GridTextAlignment.Center" />
-                <DxGridDataColumn FieldName=@nameof(OrderItem.Color) Caption="Цвет"   Width="15%" TextAlignment="GridTextAlignment.Center" />   @*40*@
-                                                                                               
-                <DxGridDataColumn FieldName=@nameof(OrderItem.Size35)  Caption="35"   Width="2%" TextAlignment="GridTextAlignment.Center">
+                <DxGridDataColumn FieldName=@nameof(OrderItem.Color) Caption="Цвет" Width="15%" TextAlignment="GridTextAlignment.Center" />   @*40*@
+
+                <DxGridDataColumn FieldName=@nameof(OrderItem.Size35) Caption="35" Width="2%" TextAlignment="GridTextAlignment.Center">
                     <CellDisplayTemplate>
                         @{
                             string displayShow = (Convert.ToInt32(context?.Value) == 0) ? "" : context?.Value.ToString();
@@ -175,7 +189,7 @@ else
                     </CellDisplayTemplate>
                 </DxGridDataColumn>
 
-                <DxGridDataColumn FieldName=@nameof(OrderItem.Size36)  Caption="36"   Width="3%" TextAlignment="GridTextAlignment.Center">                        
+                <DxGridDataColumn FieldName=@nameof(OrderItem.Size36) Caption="36" Width="3%" TextAlignment="GridTextAlignment.Center">
                     <CellDisplayTemplate>
                         @{
                             string displayShow = (Convert.ToInt32(context?.Value) == 0) ? "" : context?.Value.ToString();
@@ -184,7 +198,7 @@ else
                     </CellDisplayTemplate>
                 </DxGridDataColumn>
 
-                <DxGridDataColumn FieldName=@nameof(OrderItem.Size37)  Caption="37"   Width="3%" TextAlignment="GridTextAlignment.Center">                        
+                <DxGridDataColumn FieldName=@nameof(OrderItem.Size37) Caption="37" Width="3%" TextAlignment="GridTextAlignment.Center">
                     <CellDisplayTemplate>
                         @{
                             string displayShow = (Convert.ToInt32(context?.Value) == 0) ? "" : context?.Value.ToString();
@@ -193,7 +207,7 @@ else
                     </CellDisplayTemplate>
                 </DxGridDataColumn>
 
-                <DxGridDataColumn FieldName=@nameof(OrderItem.Size38)  Caption="38"   Width="3%" TextAlignment="GridTextAlignment.Center">                        
+                <DxGridDataColumn FieldName=@nameof(OrderItem.Size38) Caption="38" Width="3%" TextAlignment="GridTextAlignment.Center">
                     <CellDisplayTemplate>
                         @{
                             string displayShow = (Convert.ToInt32(context?.Value) == 0) ? "" : context?.Value.ToString();
@@ -202,7 +216,7 @@ else
                     </CellDisplayTemplate>
                 </DxGridDataColumn>
 
-                <DxGridDataColumn FieldName=@nameof(OrderItem.Size39)  Caption="39"   Width="3%" TextAlignment="GridTextAlignment.Center">                        
+                <DxGridDataColumn FieldName=@nameof(OrderItem.Size39) Caption="39" Width="3%" TextAlignment="GridTextAlignment.Center">
                     <CellDisplayTemplate>
                         @{
                             string displayShow = (Convert.ToInt32(context?.Value) == 0) ? "" : context?.Value.ToString();
@@ -211,7 +225,7 @@ else
                     </CellDisplayTemplate>
                 </DxGridDataColumn>
 
-                <DxGridDataColumn FieldName=@nameof(OrderItem.Size40)  Caption="40"   Width="3%" TextAlignment="GridTextAlignment.Center">                        
+                <DxGridDataColumn FieldName=@nameof(OrderItem.Size40) Caption="40" Width="3%" TextAlignment="GridTextAlignment.Center">
                     <CellDisplayTemplate>
                         @{
                             string displayShow = (Convert.ToInt32(context?.Value) == 0) ? "" : context?.Value.ToString();
@@ -220,7 +234,8 @@ else
                     </CellDisplayTemplate>
                 </DxGridDataColumn>
 
-                <DxGridDataColumn FieldName=@nameof(OrderItem.Size41)  Caption="41"   Width="2%" TextAlignment="GridTextAlignment.Center">                         <CellDisplayTemplate>
+                <DxGridDataColumn FieldName=@nameof(OrderItem.Size41) Caption="41" Width="2%" TextAlignment="GridTextAlignment.Center">
+                    <CellDisplayTemplate>
                         @{
                             string displayShow = (Convert.ToInt32(context?.Value) == 0) ? "" : context?.Value.ToString();
                         }
@@ -228,11 +243,11 @@ else
                     </CellDisplayTemplate>
                 </DxGridDataColumn>  @*19*@  @*59*@
 
-                <DxGridDataColumn FieldName=@nameof(OrderItem.TotalCountPairs)  Caption="Пар" Width="4%" TextAlignment="GridTextAlignment.Center"/>  
-                <DxGridDataColumn FieldName=@nameof(OrderItem.Price)            Caption="Цена"      Width="5%" TextAlignment="GridTextAlignment.Center"/>
-                <DxGridDataColumn FieldName=@nameof(OrderItem.TotalPrice)       Caption="Итого"  Width="5%" TextAlignment="GridTextAlignment.Center"/>    @*73*@
+                <DxGridDataColumn FieldName=@nameof(OrderItem.TotalCountPairs) Caption="Пар" Width="4%" TextAlignment="GridTextAlignment.Center" />
+                <DxGridDataColumn FieldName=@nameof(OrderItem.Price) Caption="Цена" Width="5%" TextAlignment="GridTextAlignment.Center" />
+                <DxGridDataColumn FieldName=@nameof(OrderItem.TotalPrice) Caption="Итого" Width="5%" TextAlignment="GridTextAlignment.Center" />    @*73*@
                 <DxGridDataColumn FieldName=@nameof(OrderItem.Note) Caption="Заметка" Width="24%" TextAlignment="GridTextAlignment.Center" />
-                
+
                 <DxGridCommandColumn Width="3%">
                     <HeaderTemplate>
                         <DxButton RenderStyle="ButtonRenderStyle.None"
@@ -243,7 +258,7 @@ else
                     <CellDisplayTemplate>
                         <DxButton RenderStyle="ButtonRenderStyle.None"
                           title="Удалить строку"
-                          CssClass="fa fa-trash del-red" 
+                          CssClass="fa fa-trash del-red"
                           Click="(() => OpenDialogeWindow(context.DataItem as OrderItem))" />
                     </CellDisplayTemplate>
                 </DxGridCommandColumn>
@@ -253,14 +268,14 @@ else
 
         @if (DeleteDialogOpen)
         {
-            <ModalWindow Title="Подтверждение удаления" 
-                         BodyText="Вы действительно хотите удалить строку?" 
-                         BackgroundFormColor="whitesmoke"
-                         OnClose="@ConfirmDelete_Click" 
-                         DialogType="ModalWindow.ModalDialogType.DeleteCancel">
+            <ModalWindow Title="Подтверждение удаления"
+             BodyText="Вы действительно хотите удалить строку?"
+             BackgroundFormColor="whitesmoke"
+             OnClose="@ConfirmDelete_Click"
+             DialogType="ModalWindow.ModalDialogType.DeleteCancel">
             </ModalWindow>
         }
-     
+
 
         <hr />
         <div class="d-flex justify-content-between">
@@ -322,7 +337,7 @@ else
 
     protected string VisibleChangeClient()
     {
-        return (order?.Id > 0 && selectedClient != null || order?.Id == 0 && testClientid > 0) ? "none" : "flex";
+        return (orderId > 0 && selectedClient != null || orderId == 0 && testClientid > 0) ? "none" : "flex";
     }
 
 
@@ -363,7 +378,7 @@ else
         {
             if (orderId > 0)
             {
-                orderString.Kod  = orderString?.Kod?.ToUpper();
+                orderString.Kod = orderString?.Kod?.ToUpper();
                 orderString.Leather = orderString?.Leather?.ToUpper();
                 orderString.Color = orderString?.Color?.ToUpper();
                 orderString.OrderId = orderId;
@@ -406,7 +421,7 @@ else
         return (size == 0) ? "hideLabel" : "blackColor";
     }
 
-    private string GetFontColorClass(string prop)
+    private string GetFontColorClass(string? prop)
     {
         return (prop is null) ? "hideLabel" : "blackColor";
     }
